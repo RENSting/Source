@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>REN Sting</Authors>
+    <Company>CNF</Company>
+    <Product>公司基础代码库</Product>
+    <Description>基础代码库是是无依赖的代码库，通过封装一些最常用的方法辅助自动化编程，例如数据访问、安全性、序列化等。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+</Project>

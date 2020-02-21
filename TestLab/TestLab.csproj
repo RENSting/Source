@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cnf.Api\Cnf.Api.csproj" />
+    <ProjectReference Include="..\Cnf.CodeBase\Cnf.CodeBase.csproj" />
+    <ProjectReference Include="..\Cnf.DataAccess\Cnf.DataAccess.csproj" />
+    <ProjectReference Include="..\Solutions\Cnf.Project.Employee\Cnf.Project.Employee.Entity\Cnf.Project.Employee.Entity.csproj" />
+  </ItemGroup>
+
+</Project>

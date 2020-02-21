@@ -1,0 +1,32 @@
+﻿
+@{
+    ViewData["Title"] = "系统";
+}
+
+<p class="lead">
+    本模块用于管理组织机构、用户以及参照项。<br />
+    参照项包括：<br />
+    <ul>
+        <li>
+            <strong>专业</strong>：代表项目人员的主要专业方向，例如机械、电仪、土建、商务等；
+        </li>
+        <li>
+            <strong>职责</strong>：代表项目人员在项目部担任的岗位，例如项目经理、安全经理、商务经理等；
+        </li>
+        <li>
+            <strong>资格类型</strong>：代表项目人员要从事某项工作需要具备的资质，例如一级建造师等，资格类型与职责关联，一项职责可能需要多种资格，一个资格也可以用于多项职责。
+        </li>
+    </ul>
+</p>
+<div class="card" style="width:400px;">
+    <div class="card-header">
+        系统管理
+    </div>
+    <div class="card-body">
+        @Html.ActionLink("管理组织单位", "Organizations", "System", null, new { @class = "btn btn-secondary btn-lg btn-block" })
+        @Html.ActionLink("管理用户", "Users", "System", null, new { @class = "btn btn-secondary btn-lg btn-block" })
+        @Html.ActionLink("管理专业", "Specialties", "System", null, new { @class = "btn btn-info btn-lg btn-block" })
+        @Html.ActionLink("管理职责", "Duties", "System", null, new { @class = "btn btn-info btn-lg btn-block" })
+        @Html.ActionLink("管理资格类型", "Qualifications", "System", null, new { @class = "btn btn-info btn-lg btn-block" })
+    </div>
+</div>

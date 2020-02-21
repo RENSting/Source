@@ -1,0 +1,53 @@
+﻿@model IEnumerable<Cnf.Project.Employee.Entity.Organization>
+
+@{
+    ViewData["Title"] = "组织单位";
+}
+
+<h1>Organizations</h1>
+
+<p>
+    <a asp-action="CreateOrg">新建组织单位</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                单位ID
+            </th>
+            <th>
+                单位名称
+            </th>
+            <th>
+                是否有效
+            </th>
+            <th>
+                创建日期
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ActiveStatus)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedOn)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
