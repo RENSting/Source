@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Cnf.Api;
 using Cnf.Project.Employee.Web.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 
 namespace Cnf.Project.Employee.Web
 {
@@ -30,8 +31,8 @@ namespace Cnf.Project.Employee.Web
             services.Configure<WebConnectorSettings>(Configuration.GetSection("WebConnectorSettings"));
 
             services.AddScoped<IApiConnector, WebApiConnector>();
-
             services.AddScoped<IUserManager, UserManger>();
+            services.AddScoped<ISysAdminService, SysAdminService>();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -41,7 +42,8 @@ namespace Cnf.Project.Employee.Web
                     options.Cookie.HttpOnly = true;
                 });
 
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                .AddRazorRuntimeCompilation();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

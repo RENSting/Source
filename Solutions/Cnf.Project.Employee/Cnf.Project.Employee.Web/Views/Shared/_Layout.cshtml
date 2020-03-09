@@ -43,9 +43,10 @@
                     </ul>
                 </div>
             </div>
-            <div class="float-right">
-                @Html.ActionLink("注销", "Logout", "Home")
-                @UserHelper.GetUserName(Context)
+            <div class="float-right" style="white-space:nowrap;">
+                <a asp-controller="Home" asp-action="ChangePassword" class="btn btn-sm btn-default">修改密码</a>
+                | <a asp-action="Logout" asp-controller="Home" class="btn btn-sm btn-default">注销</a>
+                | <span class="badge badge-primary">@UserHelper.GetUserName(Context)</span>
             </div>
         </nav>
     </header>

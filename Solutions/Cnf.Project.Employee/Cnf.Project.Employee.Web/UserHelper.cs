@@ -21,17 +21,21 @@ namespace Cnf.Project.Employee.Web
         public static int GetUserID(HttpContext context) => Convert.ToInt32(context.User.FindFirstValue(COOKIE_USERID));
 
         public static string GetUserName(HttpContext context) => context.User.FindFirstValue(COOKIE_USERNAME);
-        public static bool IsSystemAdmin(HttpContext context) =>
-            ((RoleEnum)GetRole(context) & RoleEnum.SystemAdmin) == RoleEnum.SystemAdmin;
+        public static bool IsSystemAdmin(int role) =>
+            ((RoleEnum)role & RoleEnum.SystemAdmin) == RoleEnum.SystemAdmin;
+        public static bool IsSystemAdmin(HttpContext context) => IsSystemAdmin(GetRole(context));
 
-        public static bool IsHumanResourceAdmin(HttpContext context) =>
-            ((RoleEnum)GetRole(context) & RoleEnum.HumanResourceAdmin) == RoleEnum.HumanResourceAdmin;
+        public static bool IsHumanResourceAdmin(int role) =>
+            ((RoleEnum)role & RoleEnum.HumanResourceAdmin) == RoleEnum.HumanResourceAdmin;
+        public static bool IsHumanResourceAdmin(HttpContext context) => IsHumanResourceAdmin(GetRole(context));
 
-        public static bool IsProjectAdmin(HttpContext context) =>
-            ((RoleEnum)GetRole(context) & RoleEnum.ProjectAdmin) == RoleEnum.ProjectAdmin;
+        public static bool IsProjectAdmin(int role) =>
+            ((RoleEnum)role & RoleEnum.ProjectAdmin) == RoleEnum.ProjectAdmin;
+        public static bool IsProjectAdmin(HttpContext context) => IsProjectAdmin(GetRole(context));
 
-        public static bool IsManager(HttpContext context) =>
-            ((RoleEnum)GetRole(context) & RoleEnum.Manager) == RoleEnum.Manager;
+        public static bool IsManager(int role) =>
+            ((RoleEnum)role & RoleEnum.Manager) == RoleEnum.Manager;
+        public static bool IsManager(HttpContext context) => IsManager(GetRole(context));
 
         public static async Task Signin(User user, HttpContext context)
         {

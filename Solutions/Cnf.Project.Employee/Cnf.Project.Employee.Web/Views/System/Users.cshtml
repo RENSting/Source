@@ -1,0 +1,59 @@
+@using Cnf.Project.Employee.Entity
+
+@model IEnumerable<User>
+
+@{
+    ViewData["Title"] = "用户";
+}
+
+<h1>系统中的用户</h1>
+
+<p>
+    <a asp-action="EditUser">新建用户</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>登录帐号</th>
+            <th>用户姓名</th>
+            <th>角色</th>
+            <th>有效性</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) 
+{
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.UserID)</td>
+            <td>@Html.DisplayFor(modelItem=> item.Login)</td>
+            <td>@Html.DisplayFor(modelItem => item.Name)</td>
+            <td>
+                @if(UserHelper.IsSystemAdmin(item.Role))
+                {
+                    <span class="badge badge-danger">管理员</span>
+                }
+                @if(UserHelper.IsHumanResourceAdmin(item.Role))
+                {
+                    <span class="badge badge-warning">人事主管</span>
+                }
+                @if(UserHelper.IsProjectAdmin(item.Role))
+                {
+                    <span class="badge badge-secondary">项目主管</span>
+                }
+                @if(UserHelper.IsManager(item.Role))
+                {
+                    <span class="badge badge-primary">经理</span>
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ActiveStatus)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "EditUser", new {id=item.UserID})
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

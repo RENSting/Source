@@ -28,6 +28,7 @@
         <div class="form-group">
             @Html.LabelFor(m => m.UserName)
             @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", @placeholder = "输入您的用户名" })
+            <span asp-validation-for="UserName" class="text-danger"></span>
         </div>
         <div class="form-group">
             @Html.LabelFor(m => m.Password)
@@ -40,3 +41,7 @@
 </div>
 </body>
 </html>
+
+@section Scripts{
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

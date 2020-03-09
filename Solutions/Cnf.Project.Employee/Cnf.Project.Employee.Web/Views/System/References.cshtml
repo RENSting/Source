@@ -1,0 +1,54 @@
+@using Cnf.Project.Employee.Entity;
+@model IEnumerable<Reference>
+
+@{
+    ViewData["Title"] = "参照项";
+    string typeName = RefViewMode.Translate(ViewBag.ReferenceType);
+}
+
+<h5>@typeName</h5>
+
+<p>
+    <a asp-action="EditReference" 
+        asp-all-route-data='new Dictionary<string, string>{{"t",@ViewBag.ReferenceType.ToString()}}'>新建@(typeName)</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>代号</th>
+            <th>名称</th>
+            <th>有效</th>
+            <th>创建日期</th>
+            <th>创建者ID</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ReferenceCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ReferenceValue)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ActiveStatus)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedOn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedBy)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "EditReference", new {id=item.ID})
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

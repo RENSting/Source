@@ -1,0 +1,95 @@
+@model UserViewModel
+@{
+    ViewData["Title"] = "用户";
+}
+
+@if(Model.UserId==0)
+{
+    <h5>新建用户</h5>
+}
+else
+{
+    <h5>编辑用户：ID=@Model.UserId.ToString()</h5>
+}
+
+@if(!string.IsNullOrWhiteSpace(ViewBag.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        @ViewBag.ErrorMessage
+    </div>
+}
+
+<form method="POST" style="width: 480px; margin-top:20px;">
+    @Html.HiddenFor(m=>m.UserId)
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="form-group row">
+        <label asp-for="Login" class="col-sm-3 col-form-label"></label>
+        <div class="col-sm-9">
+            <input asp-for="Login" class="form-control" placeholder="字母数字下划线2-16位">
+            <span asp-validation-for="Login" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="Name" class="col-sm-3 col-form-label"></label>
+        <div class="col-sm-9">
+            <input asp-for="Name" class="form-control" placeholder="姓名小于10个字">
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+    </div>
+    <fieldset class="form-group">
+        <div class="row">
+            <legend class="col-form-label col-sm-3 pt-0">用户角色</legend>
+            <div class="col-sm-9 offset-sm-3">
+                <div class="form-check">
+                    <input class="form-check-input" asp-for="IsSysAdmin" >
+                    <label class="form-check-label" asp-for="IsSysAdmin"></label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" asp-for="IsHumanResourceAdmin">
+                    <label class="form-check-label" asp-for="IsHumanResourceAdmin"></label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" asp-for="IsProjectAdmin">
+                    <label class="form-check-label" asp-for="IsProjectAdmin"></label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" asp-for="IsManager">
+                    <label class="form-check-label" asp-for="IsManager"></label>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+    <div class="form-group row">
+        <div class="col-sm-9 offset-sm-3">
+            <div class="form-check ">
+                <input class="form-check-input" asp-for="ActiveStatus">
+                <label class="form-check-label" asp-for="ActiveStatus"></label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-4 offset-sm-3">
+             <button asp-action="EditUser" class="btn btn-success">提交保存</button>
+        </div>
+        <div class="col-sm-5">
+            <a asp-action="Users" class="btn btn-default">返回用户列表</a>
+        </div>
+    </div>
+    @if(Model.UserId>0)
+    {
+        <div class="form-group row">
+            <div class="col-sm-4 offset-sm-3">
+                <a class="btn btn-danger" asp-action="DeleteUser" asp-route-id="@Model.UserId"
+                    onclick="if(confirm('删除用户是不可恢复的操作，确实要删除吗？')==false)return false;">
+                    删除用户</a>
+            </div>
+            <div class="col-sm-4">
+                <a class="btn btn-danger" asp-controller="Home" asp-action="ChangePassword" asp-route-id="@Model.UserId">修改密码</a>
+            </div>
+        </div>
+    }
+</form>
+
+@section Scripts{
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,4 +1,5 @@
-﻿
+﻿@using Cnf.Project.Employee.Entity;
+
 @{
     ViewData["Title"] = "系统";
 }
@@ -25,8 +26,11 @@
     <div class="card-body">
         @Html.ActionLink("管理组织单位", "Organizations", "System", null, new { @class = "btn btn-secondary btn-lg btn-block" })
         @Html.ActionLink("管理用户", "Users", "System", null, new { @class = "btn btn-secondary btn-lg btn-block" })
-        @Html.ActionLink("管理专业", "Specialties", "System", null, new { @class = "btn btn-info btn-lg btn-block" })
-        @Html.ActionLink("管理职责", "Duties", "System", null, new { @class = "btn btn-info btn-lg btn-block" })
-        @Html.ActionLink("管理资格类型", "Qualifications", "System", null, new { @class = "btn btn-info btn-lg btn-block" })
+        @Html.ActionLink("管理专业", "References", "System",
+            new {t=ReferenceTypeEnum.Specialty.ToString()}, new { @class = "btn btn-info btn-lg btn-block" })
+        @Html.ActionLink("管理职责", "References", "System",
+            new {t=ReferenceTypeEnum.Duty.ToString()}, new { @class = "btn btn-info btn-lg btn-block" })
+        @Html.ActionLink("管理资格类型", "References", "System",
+            new {t=ReferenceTypeEnum.Qualification.ToString()}, new { @class = "btn btn-info btn-lg btn-block" })
     </div>
 </div>

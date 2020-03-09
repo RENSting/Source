@@ -1,0 +1,61 @@
+@model Cnf.Project.Employee.Web.Models.OrgViewModel
+
+@{
+    ViewData["Title"] = "单位";
+}
+
+@if(Model.OrgId==0)
+{
+    <h5>新建单位</h5>
+}
+else
+{
+    <h5>编辑单位：ID=@Model.OrgId.ToString()</h5>
+}
+
+@if(!string.IsNullOrWhiteSpace(ViewBag.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        @ViewBag.ErrorMessage
+    </div>
+}
+
+<form role="form" method="POST" style="width: 480px; margin-top:20px;">
+    @Html.HiddenFor(m=>m.OrgId)
+    <div class="form-group row">
+        <label asp-for="OrgName" class="col-sm-3 col-form-label"></label>
+        <div class="col-sm-9">
+            <input asp-for="OrgName" class="form-control" placeholder="输入单位名称">
+            <span asp-validation-for="OrgName" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-9 offset-sm-3">
+            <div class="form-check">
+                <input asp-for="ActiveStatus" class="form-check-input">
+                <label asp-for="ActiveStatus" class="form-check-label"></label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-4 offset-sm-3">
+             <button asp-action="EditOrganization" class="btn btn-success">提交保存</button>
+        </div>
+        <div class="col-sm-5">
+            <a asp-action="Organizations" class="btn btn-default">返回单位列表</a>
+        </div>
+    </div>
+    @if(Model.OrgId>0)
+    {
+        <div class="form-group row">
+            <div class="col-sm-4 offset-sm-3">
+                <button asp-action="DeleteOrganization" class="btn btn-danger"
+                    onclick="if(confirm('删除单位是不可恢复的操作，确实要删除吗？')==false)return false;">删除单位</button>
+            </div>
+        </div>
+    }
+</form>
+
+@section Scripts{
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

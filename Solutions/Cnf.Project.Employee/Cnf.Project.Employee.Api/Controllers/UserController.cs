@@ -8,6 +8,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Cnf.Project.Employee.Api.Controllers
 {
@@ -37,6 +38,29 @@ namespace Cnf.Project.Employee.Api.Controllers
         {
             User user = await DbHelper.FindEntity<User>(Connector, userId);
             return Success(user);
+        }
+
+        // api/User/Delete
+
+        [HttpPost("Delete")]
+        /// <summary>
+        /// input: json(int); UserId
+        /// output: ApiResult(bool);
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ActionResult<ApiResult<bool>>> Delete()
+        {
+            using StreamReader sr = new StreamReader(Request.Body);
+            try
+            {
+                string userId = await sr.ReadToEndAsync();
+                await DbHelper.DeleteEntity<User>(Connector, int.Parse(userId));
+                return Success(true);
+            }
+            catch(Exception ex)
+            {
+                return Error<bool>(ex.Message);
+            }
         }
 
         // api/User/Save
@@ -99,7 +123,7 @@ namespace Cnf.Project.Employee.Api.Controllers
                 if (string.IsNullOrEmpty(oldCredential)
                     || oldCredential.Equals(changeCredential.OldCredential))
                 {
-                    //用户当前口令为空白，可以随意修改
+                    //用户当前口令为空白,或者输入旧口令一致，允许修改
                     await Connector.ExecuteSqlNonQuery(
                         "UPDATE [tb_user] SET [Password]=@password WHERE [UserID]=@userId",
                         new SqlParameter("@password", changeCredential.NewCredential),
@@ -116,7 +140,39 @@ namespace Cnf.Project.Employee.Api.Controllers
             {
                 return Error<bool>(ex.Message);
             }
+        }
 
+        //  api/User/GetUserByLogin
+
+        /// <summary>
+        /// input: Json(string)
+        /// return: ApiResult(User) or ApiResult(error)
+        /// if user==null or user.ID == 0, not found
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("GetUserByLogin")]
+        public async Task<ActionResult<ApiResult<User>>> GetUserByLogin()
+        {
+            using StreamReader sr = new StreamReader(Request.Body);
+            try
+            {
+                string login = SerializationHelper.JsonDeserialize<string>(await sr.ReadToEndAsync());
+
+                var result = await DbHelper.SearchEntities<User>(Connector,
+                            new Dictionary<string, object>{{"Login", login}}, 0, 1, "Login", false);
+                if(result.Total > 0)
+                {
+                    return Success(result.Records[0]);
+                }
+                else
+                {
+                    return Success(default(User));
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error<User>(ex.Message);
+            }
         }
 
         // api/User/Authenticate
@@ -136,9 +192,11 @@ namespace Cnf.Project.Employee.Api.Controllers
                     await sr.ReadToEndAsync());
 
                 DataTable dataTable = await Connector.ExecuteSqlQueryTable(
-                    "SELECT [UserID] FROM [tb_user] WHERE [Login]=@login AND [Password]=@password",
+                    @"SELECT [UserID] FROM [tb_user] 
+                        WHERE [Login]=@login 
+                            AND([Password] IS NULL OR [Password]=@password)",
                     new SqlParameter("@login", authentication.Login),
-                    new SqlParameter("@password", authentication.Credential));
+                    new SqlParameter("@password", authentication.Credential??""));
 
                 if(dataTable != null && dataTable.Rows.Count > 0)
                 {

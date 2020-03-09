@@ -1,4 +1,5 @@
 ﻿using Cnf.CodeBase.Serialize;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -13,7 +14,11 @@ namespace Cnf.Api
 
         string InvokeApi(string fullUrl, bool isPost, string contentType, string postData)
         {
-            WebRequest request = WebRequest.Create(fullUrl);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fullUrl);
+            if (fullUrl.StartsWith("https", StringComparison.OrdinalIgnoreCase))
+            {
+                request.ServerCertificateValidationCallback = (s, c, e, t) => true;
+            }
             if (isPost)
             {
                 request.Method = "POST";
@@ -42,7 +47,12 @@ namespace Cnf.Api
 
         async Task<string> InvokeApiAsync(string fullUrl, bool isPost, string contentType, string postData)
         {
-            WebRequest request = WebRequest.Create(fullUrl);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fullUrl);
+            if (fullUrl.StartsWith("https", StringComparison.OrdinalIgnoreCase))
+            {
+                request.ServerCertificateValidationCallback = (s, c, e, t) => true;
+            }
+
             if (isPost)
             {
                 request.Method = "POST";
@@ -154,7 +164,7 @@ namespace Cnf.Api
         /// <param name="post">POST的对象</param>
         /// <returns></returns>
         public ApiResult<TReturn> Post<T, TReturn>(string appName, string route, T post) 
-            where T : new() where TReturn : new() =>
+            where TReturn : new() =>
             SerializationHelper.JsonDeserialize<ApiResult<TReturn>>(
                 InvokeApi(BuildUrl(appName, route), true, "application/json;charset=utf-8",
                     SerializationHelper.JsonSerialize(post)));
@@ -171,7 +181,7 @@ namespace Cnf.Api
         /// <param name="post">POST的对象</param>
         /// <returns></returns>
         public async Task<ApiResult<TReturn>> PostAsync<T, TReturn>(string appName, string route, T post)
-            where T : new() where TReturn : new() =>
+            where TReturn : new() =>
             SerializationHelper.JsonDeserialize<ApiResult<TReturn>>(
                 await InvokeApiAsync(BuildUrl(appName, route), true, "application/json;charset=utf-8",
                     SerializationHelper.JsonSerialize(post)));
@@ -183,7 +193,7 @@ namespace Cnf.Api
         /// <typeparamref name="TReturn">封装在调用返回结果中的数据类型</typeparamref>
         /// <returns></returns>
         public ApiResult<TReturn> Post<T, TReturn>(string route, T post)
-            where T: new() where TReturn:new() =>
+            where TReturn:new() =>
             Post<T, TReturn>(DEFAULT, route, post);
 
         /// <summary>
@@ -193,7 +203,7 @@ namespace Cnf.Api
         /// <typeparamref name="TReturn">封装在调用返回结果中的数据类型</typeparamref>
         /// <returns></returns>
         public async Task<ApiResult<TReturn>> PostAsync<T, TReturn>(string route, T post)
-            where T : new() where TReturn : new() =>
+            where TReturn : new() =>
             await PostAsync<T, TReturn>(DEFAULT, route, post);
     }
 }

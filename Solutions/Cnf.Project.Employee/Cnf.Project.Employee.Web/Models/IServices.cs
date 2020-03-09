@@ -8,11 +8,11 @@ namespace Cnf.Project.Employee.Web.Models
 {
     public interface IApiConnector
     {
-        Task<TReturn> HttpGet<TReturn>(string route, string queryString)
+        Task<TReturn> HttpGet<TReturn>(string route, string queryString="")
             where TReturn:new();
 
-        Task<TReturn> HttpPost<T, TReturn>(string route, T data)
-            where T: new() where TReturn:new();
+        Task<TReturn> HttpPost<T, TReturn>(string route, T data=default(T))
+            where TReturn:new();
     }
 
     public interface IUserManager
@@ -24,6 +24,8 @@ namespace Cnf.Project.Employee.Web.Models
         /// <param name="credential"></param>
         /// <returns></returns>
         Task<User> Authenticate(string userName, string credential);
+
+        Task<bool> DeleteUser(int userId);
 
         /// <summary>
         /// 返回系统中的所有User
@@ -39,6 +41,13 @@ namespace Cnf.Project.Employee.Web.Models
         Task<User> GetUser(int id);
 
         /// <summary>
+        /// 根据Login返回User对象实例，没有找到返回null
+        /// </summary>
+        /// <param name="login"></param>
+        /// <returns></returns>
+        Task<User> GetUserByLogin(string login);
+
+        /// <summary>
         /// 将User实例user保存到持久化存储
         /// </summary>
         /// <param name="user"></param>
@@ -48,10 +57,7 @@ namespace Cnf.Project.Employee.Web.Models
         /// <summary>
         /// 修改User的登录口令
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="oldCredential"></param>
-        /// <param name="newCredential"></param>
         /// <returns></returns>
-        Task<bool> ChangeCredential(int userId, string oldCredential, string newCredential);
+        Task<bool> ChangeCredential(ChangeCredential credential);
     }
 }

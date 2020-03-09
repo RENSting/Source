@@ -4,10 +4,10 @@
     ViewData["Title"] = "组织单位";
 }
 
-<h1>Organizations</h1>
+<h1>系统中的单位</h1>
 
 <p>
-    <a asp-action="CreateOrg">新建组织单位</a>
+    <a asp-action="EditOrganization">新建组织单位</a>
 </p>
 <table class="table">
     <thead>
@@ -43,9 +43,7 @@
                 @Html.DisplayFor(modelItem => item.CreatedOn)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                @Html.ActionLink("Edit", "EditOrganization", new {id=item.ID})
             </td>
         </tr>
 }

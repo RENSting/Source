@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System;
 
 namespace Cnf.Project.Employee.Web.Controllers
 {
@@ -48,7 +49,9 @@ namespace Cnf.Project.Employee.Web.Controllers
                 return View(viewModel);
             }
 
-            User user = await _userManager.Authenticate(viewModel.UserName, CryptoHelper.CreateCredential(viewModel.Password));
+            string credential = string.IsNullOrWhiteSpace(viewModel.Password)? null: CryptoHelper.CreateCredential(viewModel.Password);
+
+            User user = await _userManager.Authenticate(viewModel.UserName, credential);
             if (user == null)
             {
                 viewModel.HasChecked = true;
@@ -68,7 +71,41 @@ namespace Cnf.Project.Employee.Web.Controllers
             return RedirectToAction("Login");
         }
 
-        public async Task<IActionResult> Index()
+        [HttpGet("{controller}/{action}/{id?}")]
+        public async Task<IActionResult> ChangePassword(int? id)
+        {
+            int currentUserId = id.HasValue? id.Value: UserHelper.GetUserID(HttpContext);
+            ChangePasswordViewModel model = await _userManager.GetUser(currentUserId);
+            return View(model);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if(ModelState.IsValid)
+            {
+                var data = new ChangeCredential
+                        {
+                            UserID = model.UserId,
+                            OldCredential = string.IsNullOrWhiteSpace(model.OldPassword)?
+                                null: CryptoHelper.CreateCredential(model.OldPassword),
+                            NewCredential = string.IsNullOrWhiteSpace(model.NewPassword)?
+                                null: CryptoHelper.CreateCredential(model.NewPassword)
+                        };
+                try
+                {
+                    await _userManager.ChangeCredential(data);
+                    return RedirectToAction(nameof(Index));
+                }
+                catch(Exception ex)
+                {
+                    ModelState.AddModelError("", "修改口令没有成功:" + ex.Message);
+                }
+            }
+            return View(model);
+        }
+
+        public IActionResult Index()
         {
             return View();
         }
