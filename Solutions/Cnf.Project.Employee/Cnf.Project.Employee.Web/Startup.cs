@@ -33,6 +33,7 @@ namespace Cnf.Project.Employee.Web
             services.AddScoped<IApiConnector, WebApiConnector>();
             services.AddScoped<IUserManager, UserManger>();
             services.AddScoped<ISysAdminService, SysAdminService>();
+            services.AddScoped<IEmployeeService, EmployeeService>();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -93,6 +94,13 @@ namespace Cnf.Project.Employee.Web
                    else
                    {
                        context.Response.Redirect("/Home/Denied");
+                   }
+               }
+               else if(path.StartsWith("/employee"))
+               {
+                   if(UserHelper.IsHumanResourceAdmin(context))
+                   {
+                       await next.Invoke();
                    }
                }
 

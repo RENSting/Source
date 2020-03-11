@@ -1,0 +1,73 @@
+@model CertViewModel
+@{ViewData["Title"]="证书";}
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+<div class="card" style="width:480px;">
+  <div class="card-header align-content-center">
+    <h5>@Model.QualifName</h5>
+  </div>
+  <div class="card-body">
+    <form method="POST">
+      @Html.HiddenFor(m=>m.CertId)
+      @Html.HiddenFor(m=>m.EmployeeId)
+      @Html.HiddenFor(m=>m.QualifName)
+      <div class="form-group row">
+        <label asp-for="EmployeeName" class="col-form-label col-3"></label>
+        <div class="col-9">
+            <input asp-for="EmployeeName" readonly class="form-control-plaintext">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label asp-for="CertName" class="col-form-label col-3"></label>
+        <div class="col-9">
+          <input asp-for="CertName" class="form-control form-control-sm" placeholder="输入证书名称">
+          <span asp-validation-for="CertName" class="text-danger"></span>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label asp-for="AuthorityUnit" class="col-form-label col-3"></label>
+        <div class="col-9">
+          <input asp-for="AuthorityUnit" class="form-control form-control-sm" placeholder="输入发证机构名称">
+          <span asp-validation-for="AuthorityUnit" class="text-danger"></span>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label asp-for="CertifyingDate" class="col-form-label col-3"></label>
+        <div class="col-9">
+          <input asp-for="CertifyingDate" class="form-control form-control-sm">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label asp-for="ExpireDate" class="col-form-label col-3"></label>
+        <div class="col-9">
+          <input asp-for="ExpireDate" class="form-control form-control-sm">
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-9 offset-3">
+          <div class="form-check">
+            <input asp-for="ActiveStatus" readonly class="form-check-input">
+            <label asp-for="ActiveStatus" class="form-check-label"></label>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-3 offset-3">
+          <button class="btn btn-success btn-sm" asp-action="CertEdit">提交保存</button>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-danger btn-sm" asp-action="CertDelete"
+            onclick="if(confirm('删除证书是不可恢复的，请问是否确实要删除它？')==false)return false;">删除证书</button>
+        </div>
+        <div class="col-3">
+          <a asp-action="EmpCerts" asp-route-id="@Model.EmployeeId" class="btn btn-default btn-sm">返回</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+@section Scripts{
+  @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

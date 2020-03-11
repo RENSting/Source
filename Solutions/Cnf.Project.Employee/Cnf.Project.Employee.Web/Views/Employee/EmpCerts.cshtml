@@ -1,0 +1,91 @@
+@model EmployeeCertsViewModel;
+@{ViewData["Title"]="证书";}
+
+@if(Model.EmployeeId>0){
+    <h5>@Model.EmployeeName &nbsp;&nbsp; 的所有证书</h5>
+}
+else{
+    <h5>没有找到人员</h5>
+}
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<form class="form-inline" method="POST">
+    @Html.HiddenFor(m=>m.EmployeeId)
+@if(Model.Certs == null || Model.Certs.Length == 0){
+    <div class="alert alert-secondary">
+        尚未登记任何资格证，请录入相关信息后点击“添加”按钮为@(Model.EmployeeName)添加证书
+    </div>
+}
+<table class="table table-sm table-bordered" style="min-width: 600px;">
+    <thead class="bg-dark text-white">
+        <tr>
+            <th>ID</th>
+            <th>资格类型</th>
+            <th>名称</th>
+            <th>发证机关</th>
+            <th>发证日期</th>     
+            <th>失效日期</th>
+            <th>是否有效</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Certs)
+    {
+        <tr>
+            <td style="text-align: center;">@Html.DisplayFor(m=>item.CertId)</td>
+            <td>@Html.DisplayFor(m=>item.QualifName)</td>
+            <td>@Html.DisplayFor(m=>item.CertName)</td>
+            <td>@Html.DisplayFor(m=>item.AuthorityUnit)</td>
+            <td>@Html.DisplayFor(m=>item.CertifyingDate)</td>
+            <td>@Html.DisplayFor(m=>item.ExpireDate)</td>
+            <td style="vertical-align: middle; text-align: center;">@Html.DisplayFor(m=>item.ActiveStatus)</td>
+            <td>
+                @Html.ActionLink("编辑", "CertEdit", new{id=item.CertId})
+            </td>
+        </tr>
+    }
+        <tr>
+            <td style="vertical-align: middle; text-align: center;">
+                <span class="text-danger">*</span>
+            </td>
+            <td>
+                <div class="form-group">
+                    <select asp-for="NewCertQualifId" asp-items="Model.QualifList" 
+                        class="form-control form-control-sm w-100"></select>
+                </div>
+            </td>
+            <td>
+                <div class="form-group">
+                    <input asp-for="NewCertName" class="form-control form-control-sm w-100">
+                </div>
+            </td>
+            <td>
+                <div class="form-group">
+                    <input asp-for="NewCertAuthUnit" class="form-control form-control-sm w-100">
+                </div>
+            </td>
+            <td>
+                <div class="form-group">
+                    <input asp-for="NewCertIssueDate" class="form-control form-control-sm w-100">
+                </div>
+            </td>
+            <td>
+                <div class="form-group">
+                    <input asp-for="NewCertExpireDate" class="form-control form-control-sm w-100">
+                </div>
+            </td>
+            <td style="text-align: center; vertical-align: middle;">
+                <div class="form-group form-check">
+                    <input class="form-check-input" asp-for="NewCertActive">
+                </div>
+            </td>
+            <td>
+                <div class="form-group text-nowrap">
+                    <button asp-action="CertAdd" class="btn btn-primary btn-sm">添加</button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</form>

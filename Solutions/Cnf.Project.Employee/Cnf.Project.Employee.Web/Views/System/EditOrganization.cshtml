@@ -13,15 +13,9 @@ else
     <h5>编辑单位：ID=@Model.OrgId.ToString()</h5>
 }
 
-@if(!string.IsNullOrWhiteSpace(ViewBag.ErrorMessage))
-{
-    <div class="alert alert-danger">
-        @ViewBag.ErrorMessage
-    </div>
-}
-
 <form role="form" method="POST" style="width: 480px; margin-top:20px;">
     @Html.HiddenFor(m=>m.OrgId)
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="form-group row">
         <label asp-for="OrgName" class="col-sm-3 col-form-label"></label>
         <div class="col-sm-9">

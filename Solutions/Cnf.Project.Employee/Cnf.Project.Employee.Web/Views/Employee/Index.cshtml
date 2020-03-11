@@ -1,0 +1,71 @@
+@model EmployeeListViewModel
+
+@{
+    ViewData["Title"] = "人员";
+}
+
+<h5 class="mb-2">系统中的人员（按组织）</h5>
+
+<form method="get" asp-action="Index" class="form-inline mb-2">
+    <div class="form-group mr-2">
+        <label class="mr-2 col-form-label col-form-label-sm">选择组织</label>
+        <select asp-for="SelectedOrg" asp-items="Model.OrgList" class="form-control form-control-sm">
+        </select>
+    </div>
+    <div class="form-group mr-2">
+        <input type="submit" class="btn btn-sm btn-primary" value="筛选">
+    </div>
+    <div class="form-group ml-2">
+        <a asp-action="Edit" asp-route-selectedOrg="@Model.SelectedOrg">新建人员</a>
+    </div>
+</form>
+
+@if(@Model.Employees == null || Model.Employees.Count() == 0)
+{
+    <div class="alert alert-secondary">
+        当前组织中没有人员，请即刻创建一个，或者选择其它组织后点击“筛选”
+    </div>
+}
+else{
+<div>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>姓名</th>
+            <th>职务</th>
+            <th>所在项目</th>
+            <th>承担职责</th>
+            <th>是否有效</th>
+            <th>创建日期</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Employees) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>@Html.DisplayFor(m=>item.Title)</td>
+            <td>@Html.DisplayFor(m=>item.ProjectName)</td>
+            <td>@Html.DisplayFor(m=>item.DutyName)</td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ActiveStatus)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedOn)
+            </td>
+            <td>
+                @Html.ActionLink("编辑", "Edit", new {id=item.ID}) |
+                @Html.ActionLink("证书", "EmpCerts", new{id=item.ID})
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+</div>
+}

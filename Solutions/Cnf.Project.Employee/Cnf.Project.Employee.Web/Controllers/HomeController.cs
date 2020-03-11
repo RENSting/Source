@@ -52,7 +52,7 @@ namespace Cnf.Project.Employee.Web.Controllers
             string credential = string.IsNullOrWhiteSpace(viewModel.Password)? null: CryptoHelper.CreateCredential(viewModel.Password);
 
             User user = await _userManager.Authenticate(viewModel.UserName, credential);
-            if (user == null)
+            if (user == null || user.ActiveStatus == false)
             {
                 viewModel.HasChecked = true;
                 return View(viewModel);

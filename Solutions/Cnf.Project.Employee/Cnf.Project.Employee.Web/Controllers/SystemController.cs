@@ -47,12 +47,18 @@ namespace Cnf.Project.Employee.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteOrganization([FromForm] OrgViewModel model)
         {
-            if (await _sysAdminSvc.DeleteOrganization(model.OrgId) == true)
+            if (model.ActiveStatus == true)
             {
-                return RedirectToAction(nameof(Organizations));
+                ModelState.AddModelError("", "正在使用的组织不可以删除，请首先设置它为无效");
             }
-            ViewBag.ErrorMessage = "删除单位出现错误，没有成功。";
-
+            else
+            {
+                if (await _sysAdminSvc.DeleteOrganization(model.OrgId) == true)
+                {
+                    return RedirectToAction(nameof(Organizations));
+                }
+                ModelState.AddModelError("", "删除单位出现错误，没有成功。");
+            }
             return View("EditOrganization", model);
         }
 
@@ -82,7 +88,7 @@ namespace Cnf.Project.Employee.Web.Controllers
                 }
                 else
                 {
-                    ViewBag.ErrorMessage = "向数据库提交保存单位出现错误";
+                    ModelState.AddModelError("", "向数据库提交保存单位出现错误");
                 }
             }
             return View(model);
@@ -206,6 +212,10 @@ namespace Cnf.Project.Employee.Web.Controllers
             {
                 ModelState.AddModelError("", "不能删除当前登录的用户");
             }
+            else if (model.ActiveStatus == true)
+            {
+                ModelState.AddModelError("", "不可以删除有效状态的用户");
+            }
             else
             {
                 if (await _userManager.DeleteUser(model.UserId) == true)
@@ -294,14 +304,21 @@ namespace Cnf.Project.Employee.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
+                if (model.ActiveStatus == true)
                 {
-                    await _sysAdminSvc.DeleteReference(model.ID);
-                    return RedirectToAction(nameof(References), new { t = RefViewMode.Parse(model.Type) });
+                    ModelState.AddModelError("", $"不能删除正在使用中的{model.Type}, 请首先停用它");
                 }
-                catch (Exception ex)
+                else
                 {
-                    ModelState.AddModelError("", "删除参照项失败：" + ex.Message);
+                    try
+                    {
+                        await _sysAdminSvc.DeleteReference(model.ID);
+                        return RedirectToAction(nameof(References), new { t = RefViewMode.Parse(model.Type) });
+                    }
+                    catch (Exception ex)
+                    {
+                        ModelState.AddModelError("", "删除参照项失败：" + ex.Message);
+                    }
                 }
             }
             return View(nameof(EditReference), model);
