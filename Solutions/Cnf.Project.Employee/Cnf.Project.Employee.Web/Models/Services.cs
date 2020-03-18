@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cnf.Api;
 using Cnf.CodeBase.Serialize;
-using Cnf.CodeBase.Secure;
 using Cnf.Project.Employee.Entity;
 using Microsoft.Extensions.Options;
 
@@ -24,7 +22,7 @@ namespace Cnf.Project.Employee.Web.Models
         {
             string fullUrl = route + 
                 (string.IsNullOrWhiteSpace(queryString)?"":
-                    ("?"+System.Web.HttpUtility.UrlEncode(queryString)));
+                    ("?"+queryString));
             var apiResult = await _connector.GetAsync<TReturn>(fullUrl);
             if (apiResult.IsSuccess)
                 return apiResult.GetData();
@@ -40,6 +38,17 @@ namespace Cnf.Project.Employee.Web.Models
                 return apiResult.GetData();
             else
                 throw new Exception(apiResult.Message);
+        }
+
+        // POST api/Project/Verify json({EmployeeID, ProjectID, DutyID})
+
+        public async Task<ApiResult<int>> VerifyTransfer(int projectId, int dutyId, int employeeId)
+        {
+            var data = new TransferInfo{
+                EmployeeId = employeeId, DutyId = dutyId, ProjectId = projectId,
+            };
+            
+            return await _connector.PostAsync<TransferInfo, int>("api/Project/Verify", data);
         }
     }
 

@@ -14,6 +14,8 @@ namespace Cnf.Project.Employee.Web.Models
         Task<Certification> GetCertification(int certId);
         Task DeleteCertification(int certId);
         Task DeleteEmployee(int employeeId);
+        Task<Entity.Employee[]> GetEmployeesInProject(int projectId, bool forCheck);
+        Task<PagedQuery<Entity.Employee>> SearchEmployee(CriteriaForEmployee criteria);
     }
     public class EmployeeService: IEmployeeService
     {
@@ -25,6 +27,8 @@ namespace Cnf.Project.Employee.Web.Models
         const string ROUTE_SAVE_CERT = "api/Certification/Save";
         const string ROUTE_GET_CERT = "api/Certification";  //need add /{id}
         const string ROUTE_DELETE_CERT = "api/Certification/Delete"; //post json(id)
+        const string ROUTE_PROJECT_EMPLOYEEs = "api/Employee/InProject"; //need add /{id}
+        const string ROUTE_SEARCH = "api/Employee/Search";  //post CriterialForEmployee
 
         readonly IApiConnector _apiConnector;
 
@@ -65,10 +69,18 @@ namespace Cnf.Project.Employee.Web.Models
             return result.Records;
         }
 
+        public async Task<Entity.Employee[]> GetEmployeesInProject(int projectId, bool forCheck) =>
+            (await _apiConnector.HttpGet<PagedQuery<Entity.Employee>>(
+                    ROUTE_PROJECT_EMPLOYEEs + $"/{projectId}" + (forCheck?"?forcheck=true":"")))?.Records;
+
         public async Task SaveCertification(Certification certification) =>
             await _apiConnector.HttpPost<Certification, int>(ROUTE_SAVE_CERT, certification);
 
         public async Task<int> SaveEmployee(Entity.Employee employee) => 
             await _apiConnector.HttpPost<Entity.Employee, int>(ROUTE_SAVE, employee);
+
+        public async Task<PagedQuery<Entity.Employee>> SearchEmployee(CriteriaForEmployee criteria) =>
+            await _apiConnector.HttpPost<CriteriaForEmployee,PagedQuery<Entity.Employee>>(
+                ROUTE_SEARCH, criteria);
     }
 }

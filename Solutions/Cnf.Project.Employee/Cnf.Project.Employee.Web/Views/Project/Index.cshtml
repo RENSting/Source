@@ -1,0 +1,77 @@
+@model ProjectListViewModel
+
+@{ViewData["Title"] = "项目";}
+
+<div class="card">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" asp-action="Index">项目管理</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" asp-action="Require">职责-资格</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" asp-action="Dispatch">人员调配</a>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+      <div class="card-title">系统中的项目</div>
+<form method="GET" asp-action="Index" class="form-inline mb-2">
+    <div class="form-group mr-2">
+        <label class="mr-2 col-form-label col-form-label-sm">项目状态</label>
+        @Html.DropDownListFor(m=>m.SelectedState, 
+                  Html.GetEnumSelectList<ProjectState>(), 
+                  "-=全部=-", new{@class="form-control form-control-sm"})
+    </div>
+    <div class="form-group mr-2">
+        <input type="submit" class="btn btn-sm btn-primary" value="筛选">
+    </div>
+    <div class="form-group ml-2">
+        <a asp-action="Edit">添加项目</a>
+    </div>
+</form>
+
+@if(@Model.Data != null && Model.Data.Length > 0)
+{
+      <table class="table table-bordered table-sm">
+        <thead class="bg-dark text-white">
+          <tr>
+            <th>ID</th>
+            <th>项目名称</th>
+            <th>所在地</th>
+            <th>业主</th>
+            <th>开工日期</th>
+            <th>完工日期</th>
+            <th>状态</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+      @foreach (var item in Model.Data)
+      {
+          <tr>
+            <td>@Html.DisplayFor(m=>item.ProjectId)</td>
+            <td>@Html.DisplayFor(m=>item.FullName)</td>
+            <td>@Html.DisplayFor(m=>item.SitePlace)</td>
+            <td>@Html.DisplayFor(m=>item.Owner)</td>
+            <td class="text-nowrap">@Html.DisplayFor(m=>item.BeginDate)</td>
+            <td class="text-nowrap">@Html.DisplayFor(m=>item.EndDate)</td>
+            <td class="text-nowrap">@Html.DisplayFor(m=>item.State)</td>
+            <td class="text-nowrap">
+              @Html.ActionLink("编辑", "Edit", new{id=item.ProjectId}) |
+              @Html.ActionLink("人员", "ListEmployees", new{id=item.ProjectId})
+            </td>
+          </tr>
+      }
+        </tbody>
+      </table>
+}
+else{
+    <div class="alert alert-secondary">
+        当前符合条件的项目，请即刻创建一个，或者选择其它状态后点击“筛选”
+    </div>
+}
+  </div>
+</div>

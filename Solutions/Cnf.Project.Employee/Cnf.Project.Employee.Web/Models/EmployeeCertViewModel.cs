@@ -43,7 +43,7 @@ namespace Cnf.Project.Employee.Web.Models
         /// <param name="employee">人员实体</param>
         /// <param name="references">全部资格类型集合</param>
         /// <returns></returns>
-        public static CertViewModel Create(Certification cert, Entity.Employee employee, Reference[] references) =>
+        public static CertViewModel Create(Certification cert, Entity.Employee employee, Reference[] qulifications) =>
             new CertViewModel
             {
                 ActiveStatus = cert.ActiveStatus,
@@ -55,7 +55,7 @@ namespace Cnf.Project.Employee.Web.Models
                 EmployeeName = employee.Name,
                 ExpireDate = cert.ExpireDate,
                 QualifID = cert.QualificationID,
-                QualifName = (references.Select(q =>
+                QualifName = (qulifications.Select(q =>
                                 new
                                 {
                                     Id = q.ID,
@@ -96,15 +96,15 @@ namespace Cnf.Project.Employee.Web.Models
         /// <param name="references">所有资格类型参照项实体集合</param>
         /// <returns></returns>
         public static EmployeeCertsViewModel Create(Entity.Employee employee,
-            Certification[] certifications, Reference[] references) =>
+            Certification[] certifications, Reference[] qulifications) =>
             new EmployeeCertsViewModel
             {
                 EmployeeId = employee.ID,
                 EmployeeName = employee.Name,
-                Certs = certifications?.Select(c => CertViewModel.Create(c, employee, references))
-                            .ToList().ToArray(),
-                QualifList = new SelectList(references, nameof(Reference.ID), nameof(Reference.ReferenceValue)),
-                NewCertQualifId = references?.First()?.ID,
+                Certs = certifications?.Select(c => CertViewModel.Create(c, employee, qulifications))
+                            .ToArray(),
+                QualifList = new SelectList(qulifications, nameof(Reference.ID), nameof(Reference.ReferenceValue)),
+                NewCertQualifId = qulifications?.First()?.ID,
                 NewCertIssueDate = DateTime.Today,
                 NewCertExpireDate = DateTime.Today.AddYears(3),
                 NewCertActive = true,

@@ -17,9 +17,9 @@ namespace Cnf.Project.Employee.Api.Controllers
         public ProjectController(IConfiguration configuration) : base(configuration) { }
 
         //
-        // api/Project/Status/1
+        // api/Project/Status/1 (mo id means ignoring status)
         //
-        [HttpGet("Status/{id}")]
+        [HttpGet("Status/{id?}")]
         public async Task<ActionResult<ApiResult<PagedQuery<Entity.Project>>>> GetProjectsByStatus(int? id)
         {
             PagedQuery<Entity.Project> pagedQuery;
@@ -107,13 +107,13 @@ namespace Cnf.Project.Employee.Api.Controllers
         //                              =   1     /// WARNING (ApiResult.Message 包含 警告项)
         //
         [HttpPost("Verify")]
-        public async Task<ActionResult<ApiResult<int>>> VerifyTransfer([FromBody] dynamic transferInfo)
+        public async Task<ActionResult<ApiResult<int>>> VerifyTransfer([FromBody] TransferInfo transferInfo)
         {
             try
             {
-                int employeeId = Convert.ToInt32(transferInfo.EmployeeID);
-                int projectId = Convert.ToInt32(transferInfo.ProjectID);
-                int dutyId = Convert.ToInt32(transferInfo.DutyID);
+                int employeeId = transferInfo.EmployeeId;
+                int projectId = transferInfo.ProjectId;
+                int dutyId = transferInfo.DutyId;
 
                 if (employeeId <= 0 || projectId <= 0 || dutyId <= 0)
                 {
@@ -199,14 +199,14 @@ namespace Cnf.Project.Employee.Api.Controllers
         // POST api/Project/Transfer json({EmployeeID, ProjectID, DutyID, UserID})
         //
         [HttpPost("Transfer")]
-        public async Task<ActionResult<ApiResult<int>>> Transfer([FromBody] dynamic transferInfo)
+        public async Task<ActionResult<ApiResult<int>>> Transfer([FromBody] TransferInfo transferInfo)
         {
             try
             {
-                int employeeId = Convert.ToInt32(transferInfo.EmployeeID);
-                int projectId = Convert.ToInt32(transferInfo.ProjectID);
-                int dutyId = Convert.ToInt32(transferInfo.DutyID);
-                int userId = Convert.ToInt32(transferInfo.UserID);
+                int employeeId = transferInfo.EmployeeId;
+                int projectId = transferInfo.ProjectId;
+                int dutyId = transferInfo.DutyId;
+                int userId = transferInfo.UserId;
 
                 if (employeeId <= 0)
                 {
@@ -305,12 +305,15 @@ namespace Cnf.Project.Employee.Api.Controllers
         }
 
         //
-        // api/Project/Inlog?employeeId=&projectId=
+        // api/Project/Inlog?employeeId=&projectId=&forCheck=
+        //  **** forCheck=true means just return the first one to check if any record exists
         //
         [HttpGet("Inlog")]
         public async Task<ActionResult<ApiResult<PagedQuery<TransferInLog>>>> GetInlogs(
-            [FromQuery] int? employeeId, [FromQuery] int? projectId)
+            [FromQuery] int? employeeId, [FromQuery] int? projectId, bool? forCheck)
         {
+            var pageSize = (forCheck == null || forCheck.Value == false)?int.MaxValue:1;
+
             Dictionary<string, object> criteria = new Dictionary<string, object>();
             if (employeeId.HasValue)
                 criteria.Add(nameof(TransferInLog.InEmployeeID), employeeId.Value);
@@ -318,17 +321,20 @@ namespace Cnf.Project.Employee.Api.Controllers
                 criteria.Add(nameof(TransferInLog.InProjectID), projectId.Value);
 
             var pagedQuery = await DbHelper.SearchEntities<TransferInLog>(
-                Connector, criteria, 0, int.MaxValue, nameof(TransferInLog.InDate), false);
+                Connector, criteria, 0, pageSize, nameof(TransferInLog.InDate), false);
             return Success(pagedQuery);
         }
 
         //
-        // api/Project/Outlog?employeeId=&projectId=
+        // api/Project/Outlog?employeeId=&projectId=&forCheck=
+        //  **** forCheck=true means just return the first one to check if any record exists
         //
         [HttpGet("Outlog")]
         public async Task<ActionResult<ApiResult<PagedQuery<TransferOutLog>>>> GetOutlogs(
-            [FromQuery] int? employeeId, [FromQuery] int? projectId)
+            [FromQuery] int? employeeId, [FromQuery] int? projectId, bool? forCheck)
         {
+            var pageSize = (forCheck == null || forCheck.Value == false)?int.MaxValue:1;
+
             Dictionary<string, object> criteria = new Dictionary<string, object>();
             if (employeeId.HasValue)
                 criteria.Add(nameof(TransferOutLog.OutEmployeeID), employeeId.Value);
@@ -336,7 +342,7 @@ namespace Cnf.Project.Employee.Api.Controllers
                 criteria.Add(nameof(TransferOutLog.OutProjectID), projectId.Value);
 
             var pagedQuery = await DbHelper.SearchEntities<TransferOutLog>(
-                Connector, criteria, 0, int.MaxValue, nameof(TransferOutLog.OutDate), false);
+                Connector, criteria, 0, pageSize, nameof(TransferOutLog.OutDate), false);
             return Success(pagedQuery);
         }
 

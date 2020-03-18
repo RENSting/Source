@@ -43,6 +43,12 @@
                                 <a class="nav-link text-dark" asp-controller="Employee" asp-action="Index">人员管理</a>
                             </li>
                         }
+                        @if(UserHelper.IsProjectAdmin(Context))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Project" asp-action="Index">项目管理</a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>

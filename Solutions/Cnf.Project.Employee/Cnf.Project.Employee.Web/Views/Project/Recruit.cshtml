@@ -1,0 +1,166 @@
+@model RecruitViewModel
+
+@{ViewData["Title"]="添加人员";}
+
+<div class="card">
+    <div class="card-header text-center">
+        准备加入：@Model.ProjectName
+        <a asp-action="ListEmployees" asp-route-id="@Model.ProjectId" 
+            class="float-left btn btn-default m-0 p-0 text-primary">返回</a>
+    </div>
+    <div class="card-body pt-2">
+<form role="form" method="POST">
+    <div class="text-muted small row mb-2">
+        查找并选择人员，同时为他们指定加入项目后计划承担的职责
+    </div>
+    <div class="form-inline row mb-2">
+        <div class="form-group mr-2">
+            <select asp-for="SelectedOrgId" asp-items="@ViewBag.OrgList" class="form-control form-control-sm">
+                <option value="">-=选择组织=-</option>
+            </select>
+        </div>
+        <div class="form-group mr-2">
+            <select asp-for="SelectedSpecId" asp-items="@ViewBag.SpecList" class="form-control form-control-sm">
+                <option value="">-=选择专业=-</option>
+            </select>
+        </div>
+        <div class="form-group mr-2">
+            <input asp-for="SearchName" class="form-control form-control-sm" placeholder="模糊搜索...">
+        </div>
+        <div class="form-group mr-2">
+            <div class="form-check form-check-inline">
+                <input asp-for="JustFreeOnly" class="form-check-input">
+                <label asp-for="JustFreeOnly" class="form-check-label"></label>
+            </div>
+        </div>
+        <div class="form-group">
+            <button asp-action="Recruit" class="btn btn-sm btn-success">筛选和查找</button>
+        </div>
+    </div>
+    <div class="row">
+        @Html.HiddenFor(m=>m.ProjectId)
+        @Html.HiddenFor(m=>m.ProjectName)
+        <table class="table table-sm table-bordered">
+            <thead class="bg-dark text-white">
+                <tr>
+                    <th>
+                        <div class="form-check form-check-inline">
+                            <input type="checkbox" value="" onclick="checkAll(this);" class="form-check-input">
+                            <label class="form-check-label">全选</label>
+                        </div>
+                    </th>
+                    <th>计划职责</th>
+                    <th>姓名</th>
+                    <th>专业</th>
+                    <th>所在项目</th>
+                    <th>承担职责</th>
+                    <th>加入时间</th>
+                    <th>证书</th>
+                </tr>
+            </thead>
+            <tbody>
+        @for(int i = 0; i < Model.Candidates.Length; i++)
+        {
+            <tr>
+                <td style="width:5rem;">
+                    @Html.HiddenFor(m=>Model.Candidates[i].EmployeeId)
+                    <div class="form-check form-check-inline" style="vertical-align: middle;">
+                        @Html.EditorFor(m=>Model.Candidates[i].Selected, 
+                            new{@class="form-check-input"})
+                    </div>
+                </td>
+                <td style="width:10rem;">
+                    @Html.DropDownListFor(m=>Model.Candidates[i].RecruitDutyId, 
+                        (IEnumerable<SelectListItem>)ViewBag.DutyList,
+                            new{@class="form-control form-control-sm", style="padding:0;",
+                            onchange="changeDuty(this);"})
+                </td>
+                <td>@Html.HiddenFor(m=>Model.Candidates[i].EmployeeName)
+                    @Html.DisplayFor(m=>Model.Candidates[i].EmployeeName)</td>
+                <td>@Html.HiddenFor(m=>Model.Candidates[i].SpecialityName)
+                    @Html.DisplayFor(m=>Model.Candidates[i].SpecialityName)</td>
+                <td>@Html.DisplayFor(m=>Model.Candidates[i].ProjectName)</td>
+                <td>@Html.DisplayFor(m=>Model.Candidates[i].DutyName)</td>
+                <td>
+                    @if(Model.Candidates[i].ProjectId>0){ @Html.DisplayFor(m=>Model.Candidates[i].EnListDate) }
+                </td>
+                <td data-column="certs" data-employee-id="@Model.Candidates[i].EmployeeId">
+                    <div class="spinner-border spinner-border-sm text-dark" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>                    
+                </td>
+            </tr>
+        }
+            </tbody>
+        </table>
+        <div class="form-group">
+            <button asp-action="RecruitConfirm" class="btn btn-primary"
+                onclick="if(haveSelected()==false)return false;">选中人员加入项目</button>
+        </div>
+    </div>
+</form> 
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        function checkAll(chk){
+            $("td input[type='checkbox']").each(function(){
+                this.checked = chk.checked;
+            });
+        }
+
+        function changeDuty(ddl){
+            var tr = $(ddl).parents("tr");
+            var chk = $(tr).find("input[type='checkbox']");
+            $(chk).prop('checked', true);
+        }
+
+        function haveSelected(){
+            var selectedCount = 0;
+            $("td input[type='checkbox']").each(function(){
+                if(this.checked == true)
+                    selectedCount++;
+            });
+            if(selectedCount>0){
+                return true; //confirm("即将把选中的" + selectedCount + "人加入项目，确定吗？");
+            }
+            else{
+                alert("没有选择任何要加入项目的人员");
+                return false;
+            }
+        }
+
+        function buildCerts(ajaxFuncs){
+            $("td[data-column='certs']").each(function(){
+                var td=this;
+                var employeeId = $(this).attr("data-employee-id");
+                var url = "/Project/GetCertsOfEmployee?employeeId=" + employeeId;
+                ajaxFuncs.push($.getJSON(url, function(certArray){
+                    var title = '';
+                    $.each(certArray, function(){
+                        var li = '';
+                        li = li + this.name + '(有效期：' + this.expireDate.slice(0,10) + ')';
+                        li = li + '';
+                        title = (title.length>0?title+'<br/>':title) + li;
+                    });
+                    title += "";
+                    var css = "badge badge-primary";
+                    var span = "<span data-toggle='tooltip' data-html='true' class='" + css + 
+                                "' title='" + title + 
+                                "'>" + certArray.length + "个证书" + "</span>";
+                    $(td).html(span);
+                    $(td).children("span").tooltip();
+                }));
+            });
+        }
+
+        $(document).ready(function(){
+            var certAjax = new Array();
+            buildCerts(certAjax);
+            $.when(certAjax).done(function(){
+            });
+        });
+
+    </script>
+}

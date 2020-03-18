@@ -1,0 +1,81 @@
+@model List<TransferViewModel>
+
+@{ViewData["Title"]="调动";}
+
+<div class="card">
+    <div class="card-header text-center bg-warning text-primary">
+        员工调动确认
+    </div>
+    <div class="card-body pt-2">
+<form method="POST">
+    <div class="text-muted small">以下人员将被调入所指定的项目，并承担指定的职责，您还可以修改职责。</div>
+    <div class="form-inline my-3">
+        <div class="form-group mr-3">
+            <button asp-action="RecuitConfirmed" class="btn btn-danger">确定</button>
+        </div>
+        <div class="form-group">
+            <button asp-action="RecuitCancelled" class="btn btn-secondary">放弃</button>
+        </div>
+    </div>
+    <table class="table table-sm table-bordered">
+        <thead class="bg-dark text-white">
+            <tr>
+                <th>姓名</th>
+                <th>专业</th>
+                <th>调入的项目</th>
+                <th>承担的职责</th>
+                <th>资格情况</th>
+            </tr>
+        </thead>
+        <tbody>
+    @for(int i = 0; i<Model.Count; i++){
+        <tr>
+            @Html.HiddenFor(m=>Model[i].EmployeeId)
+            @Html.HiddenFor(m=>Model[i].ProjectId)
+            <td>@Html.DisplayFor(m=>Model[i].EmployeeName)</td>
+            <td>@Html.DisplayFor(m=>Model[i].SpecialityName)</td>
+            <td>@Html.DisplayFor(m=>Model[i].ProjectName)</td>
+            <td class="py-0">@Html.DropDownListFor(m=>Model[i].DutyId, 
+                (IEnumerable<SelectListItem>)ViewBag.DutyList,
+                    new{@class="form-control form-control-sm", 
+                        style="padding:0;", onchange="changeDuty(this);"})</td>
+            <td data-column="message" data-employee-id="@Model[i].EmployeeId" 
+                data-duty-id="@Model[i].DutyId" data-project-id="@Model[i].ProjectId">
+            </td>
+        </tr>
+    }
+        </tbody>
+    </table>
+</form>        
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        function changeDuty(ddl){
+            var td = $(ddl).parents("tr").children("td[data-column='message']");
+            var employeeId = $(td).attr("data-employee-id");
+            var projectId = $(td).attr("data-project-id");
+            var dutyId = $(td).attr("data-duty-id");
+            updateMessage(td, projectId, dutyId, employeeId);
+        }
+
+        function updateMessage(td, pId, dId, eId){
+            var spinDiv = '<div class="spinner-border spinner-border-sm text-dark" role="status">' 
+                    +'<span class="sr-only">Loading...</span>' + '</div>';
+            $(td).html(spinDiv);
+            var url = "/Project/VerifyTransfer?employeeId=" + eId +
+                    "&projectId=" + pId + "&dutyId=" + dId;
+            $(td).load(url);
+        }
+
+        $(function(){
+            $("td[data-column='message']").each(function(){
+                var employeeId = $(this).attr("data-employee-id");
+                var projectId = $(this).attr("data-project-id");
+                var dutyId = $(this).attr("data-duty-id");
+                updateMessage(this, projectId, dutyId, employeeId);
+            });
+        });
+    </script>
+}

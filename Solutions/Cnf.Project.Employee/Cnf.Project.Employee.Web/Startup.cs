@@ -34,6 +34,7 @@ namespace Cnf.Project.Employee.Web
             services.AddScoped<IUserManager, UserManger>();
             services.AddScoped<ISysAdminService, SysAdminService>();
             services.AddScoped<IEmployeeService, EmployeeService>();
+            services.AddScoped<IProjectService, ProjectService>();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -99,6 +100,13 @@ namespace Cnf.Project.Employee.Web
                else if(path.StartsWith("/employee"))
                {
                    if(UserHelper.IsHumanResourceAdmin(context))
+                   {
+                       await next.Invoke();
+                   }
+               }
+               else if(path.StartsWith("/project"))
+               {
+                   if(UserHelper.IsProjectAdmin(context))
                    {
                        await next.Invoke();
                    }

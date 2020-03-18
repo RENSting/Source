@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace Cnf.Project.Employee.Api.Controllers
 {
@@ -12,7 +14,7 @@ namespace Cnf.Project.Employee.Api.Controllers
     [ApiController]
     public class EmployeeController : EmployeeControllerBase
     {
-        public EmployeeController(IConfiguration configuration):base(configuration)
+        public EmployeeController(IConfiguration configuration) : base(configuration)
         {
             ;
         }
@@ -28,29 +30,78 @@ namespace Cnf.Project.Employee.Api.Controllers
         }
 
         // 
-        // api/Employee/InOrganization/2
-        //
+        // api/Employee/InOrganization/2?forCheck=
+        //  **** forCheck=true means just return the first one to check if any record exists
+
         [HttpGet("InOrganization/{id}")]
-        public async Task<ActionResult<ApiResult<PagedQuery<Entity.Employee>>>> GetEmployeesInOrganization(int id)
+        public async Task<ActionResult<ApiResult<PagedQuery<Entity.Employee>>>> GetEmployeesInOrganization(
+            int id, bool? forCheck)
         {
+            var pageSize = (forCheck == null || forCheck.Value == false) ? int.MaxValue : 1;
+
             var employees = await DbHelper.SearchEntities<Entity.Employee>(Connector,
                 new Dictionary<string, object> { [nameof(Entity.Employee.OrganizationID)] = id },
-                0, int.MaxValue, nameof(Entity.Employee.Name), false);
+                0, pageSize, nameof(Entity.Employee.Name), false);
 
             return Success(employees);
         }
 
         // 
-        // api/Employee/InProject/2
+        // api/Employee/InProject/2?forCheck=
+        //  **** forCheck=true means just return the first one to check if any record exists
         //
         [HttpGet("InProject/{id}")]
-        public async Task<ActionResult<ApiResult<PagedQuery<Entity.Employee>>>> GetEmployeesInProject(int id)
+        public async Task<ActionResult<ApiResult<PagedQuery<Entity.Employee>>>> GetEmployeesInProject(
+            int id, bool? forCheck)
         {
+            var pageSize = (forCheck == null || forCheck.Value == false) ? int.MaxValue : 1;
+
             var employees = await DbHelper.SearchEntities<Entity.Employee>(Connector,
                 new Dictionary<string, object> { [nameof(Entity.Employee.InProjectID)] = id },
-                0, int.MaxValue, nameof(Entity.Employee.Name), false);
+                0, pageSize, nameof(Entity.Employee.Name), false);
 
             return Success(employees);
+        }
+
+        [HttpPost("Search")]
+        public async Task<ActionResult<ApiResult<PagedQuery<Entity.Employee>>>> Search(
+            [FromBody] Entity.CriteriaForEmployee criteria)
+        {
+            var whereClause = "(@name is null or [Name] LIKE '%' + @name + '%')";
+            if(criteria.SelectedProj.HasValue)
+            {
+                if(criteria.SelectedProj.Value <=0)
+                    whereClause += " AND ([InProjectID] is null OR [InProjectID]<=0)";
+                else
+                    whereClause += " AND [InProjectID]=" + criteria.SelectedProj.Value.ToString();
+            }
+            if(criteria.SelectedOrg.HasValue)
+                whereClause += " AND [OrganizationID]=" + criteria.SelectedOrg.Value.ToString();
+            if(criteria.SelectedSpec.HasValue)
+                whereClause += " AND [SpecialtyID]=" + criteria.SelectedSpec.Value.ToString();
+
+            var sql = DbHelper.BuildPagedSelectSql("*", "tb_employee", 
+                whereClause, "Name", criteria.PageIndex, criteria.PageSize);
+            
+            SqlParameter p = new SqlParameter("@name", SqlDbType.NVarChar);
+            if(!string.IsNullOrWhiteSpace(criteria.SearchName))
+                p.Value = criteria.SearchName;
+            else
+                p.Value = DBNull.Value;
+            DataSet ds = await Connector.ExecuteSqlQuerySet(sql, p);
+            PagedQuery<Entity.Employee> result = new PagedQuery<Entity.Employee>();
+            if (ds != null && ds.Tables.Count == 2)
+            {
+                result.Total = (int)ds.Tables[0].Rows[0][0];
+                ds.Tables[1].TableName = "result";
+                result.Records = await Task.Run(() => ValueHelper.WrapEntities<Entity.Employee>(ds.Tables[1]));
+            }
+            else
+            {
+                result.Total = 0;
+                result.Records = new Entity.Employee[0];
+            }
+            return Success(result);
         }
 
         //

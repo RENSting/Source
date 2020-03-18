@@ -4,17 +4,12 @@ using Cnf.Project.Employee;
 
 namespace Cnf.Project.Employee.Web.Models
 {
-    public class EmployeeListViewModel
+    public class EmployeeListViewModel : ListViewModel<Entity.Employee>
     {
-        public SelectList OrgList{get;set;}
-        public string SelectedOrg{get;set;}
+        public SelectList OrgList { get; set; }
+        public string SelectedOrg { get; set; }
 
-        public IEnumerable<Entity.Employee> Employees{get;set;}
-
-        public int Total{get;set;}
-
-        public int PageIndex{get;set;}
-
-        public int PageNumber{get;set;}
+        public Entity.Employee[] Employees
+        { get { return Data; } set { Data = value; } }
     }
 }

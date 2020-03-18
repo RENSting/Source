@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Cnf.Project.Employee.Entity
 {
-    [DbTable("tb_TransferInLog")]
+    [DbTable("tb_TransferOutLog")]
     public class TransferOutLog : EntityBase
     {
         [DbField("OutEmployeeID", FieldType = SqlDbType.Int, IsForeignKey =true)]

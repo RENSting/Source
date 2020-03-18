@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cnf.CodeBase.Serialize;
 using Cnf.Project.Employee.Entity;
 
 namespace Cnf.Project.Employee.Web.Models
@@ -13,6 +14,8 @@ namespace Cnf.Project.Employee.Web.Models
 
         Task<TReturn> HttpPost<T, TReturn>(string route, T data=default(T))
             where TReturn:new();
+
+        Task<ApiResult<int>> VerifyTransfer(int projectId, int dutyId, int employeeId);
     }
 
     public interface IUserManager
