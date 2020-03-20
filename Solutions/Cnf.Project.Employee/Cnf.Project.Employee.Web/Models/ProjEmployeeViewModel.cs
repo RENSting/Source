@@ -70,10 +70,10 @@ namespace Cnf.Project.Employee.Web.Models
 
         public ProjEmployeeViewModel[] Candidates{get;set;}
 
-        public int GetTotalSize() => PageSize<= 0?20:PageSize;
+        public int GetPageSize() => PageSize<= 0?20:PageSize;
 
         public int CalcPageCount() =>
-            Total==0?1:(Total%GetTotalSize()==0?Total/GetTotalSize():Total/GetTotalSize()+1);
+            Total==0?1:(Total%GetPageSize()==0?Total/GetPageSize():Total/GetPageSize()+1);
 
         /// <summary>
         /// 获得可用于API的查询条件
@@ -81,7 +81,7 @@ namespace Cnf.Project.Employee.Web.Models
         /// <returns></returns>
         public CriteriaForEmployee GetCriteria() =>
             new CriteriaForEmployee{
-                PageIndex = PageIndex, PageSize=GetTotalSize(), SearchName = SearchName,
+                PageIndex = PageIndex, PageSize=GetPageSize(), SearchName = SearchName,
                 SelectedOrg = SelectedOrgId, 
                 SelectedSpec = SelectedSpecId,
                 SelectedProj = JustFreeOnly?0:default(int?),

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Cnf.CodeBase.Serialize;
 using Cnf.Project.Employee.Entity;
@@ -16,6 +17,8 @@ namespace Cnf.Project.Employee.Web.Models
         Task<DutyQualification[]> GetDutyQualifications(int dutyId);
         Task<string> VerifyTransfer(int employeeId, int projectId, int dutyId);
         Task Transfer(int employeeId, int projectId, int dutyId, int userId);
+        Task UpdateRequiredQualifcations(DutyQualifViewModel model);
+        Task<PagedQuery<Entity.Project>> SearchProject(ProjectState? state, string searchName, int pageIndex, int pageSize);
     }
 
     public class ProjectService : IProjectService
@@ -28,6 +31,8 @@ namespace Cnf.Project.Employee.Web.Models
         const string ROUTE_DELETE_PROJECT = "api/Project/Delete";  // post json(id)
         const string ROUTE_GET_DUTYQULIFs = "api/Project/RequiredQualifications";  // need add /{dutyId}
         const string ROUTE_TRANSFER = "api/Project/Transfer";  // json({EmployeeID, ProjectID, DutyID, UserID})
+        const string ROUTE_UPDATE_NEEDQUALIFs = "api/Project/UpdateRequiredQualifcations"; // json(DutyQualifictionInfo)
+        const string ROUTE_SEARCH_PROJECT = "api/Project/Search";  //json(CriteriaForProject)
 
         readonly IApiConnector _apiConnector;
 
@@ -58,12 +63,33 @@ namespace Cnf.Project.Employee.Web.Models
         public async Task SaveProject(Entity.Project project) =>
             await _apiConnector.HttpPost<Entity.Project, int>(ROUTE_SAVE_PROJECT, project);
 
+        public async Task<PagedQuery<Entity.Project>> SearchProject(ProjectState? state, string searchName, int pageIndex, int pageSize)=>
+            await _apiConnector.HttpPost<CriteriaForProject, PagedQuery<Entity.Project>>(
+                ROUTE_SEARCH_PROJECT, new CriteriaForProject{
+                    PageIndex = pageIndex, PageSize = pageSize,
+                    ProjectStatus = state.HasValue?(ProjectStatusEnum)(int)state.Value
+                                    :default(ProjectStatusEnum?),
+                    SearchName = searchName,
+                });
+
         public async Task Transfer(int employeeId, int projectId, int dutyId, int userId)
         {
             var data = new TransferInfo{
                 DutyId = dutyId, EmployeeId=employeeId, ProjectId=projectId, UserId = userId,
             };
             await _apiConnector.HttpPost<TransferInfo, int>(ROUTE_TRANSFER, data);
+        }
+
+        public async Task UpdateRequiredQualifcations(DutyQualifViewModel model)
+        {
+            var data = new DutyQualificationInfo{
+                DutyID = model.DutyId,
+                QualifIDs = string.IsNullOrWhiteSpace(model.QualifIds)?
+                    default(int[]):
+                    model.QualifIds.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(q=>Convert.ToInt32(q)).ToArray(),
+            };
+            await _apiConnector.HttpPost<DutyQualificationInfo, bool>(ROUTE_UPDATE_NEEDQUALIFs, data);
         }
 
         public async Task<string> VerifyTransfer(int employeeId, int projectId, int dutyId)

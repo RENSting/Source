@@ -134,6 +134,13 @@ namespace Cnf.Project.Employee.Web.Controllers
             return new JsonResult(state);
         }
 
+        // the result is DutyQualification array
+
+        public async Task<JsonResult> GetDutyQualifications(int dutyId)
+        {
+            return new JsonResult(await _projectService.GetDutyQualifications(dutyId));
+        }
+
         // the result is type of Reference[]
         public async Task<JsonResult> GetCertsOfEmployee(int employeeId) =>
             new JsonResult(await _employeeService.GetCertifications(employeeId));
@@ -210,7 +217,7 @@ namespace Cnf.Project.Employee.Web.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> RecruitConfirm(RecruitViewModel model)
+        public async Task<IActionResult> RecruitConfirm(RecruitViewModel model, string from)
         {
             var transferList = new List<TransferViewModel>();
             foreach (var candidate in model.Candidates)
@@ -231,6 +238,7 @@ namespace Cnf.Project.Employee.Web.Controllers
             ViewBag.DutyList = new SelectList(
                 await _sysAdminService.GetReferences(ReferenceTypeEnum.Duty),
                 nameof(Reference.ID), nameof(Reference.ReferenceValue));
+            ViewBag.From = from;
             return View(transferList);
         }
 
@@ -292,14 +300,57 @@ namespace Cnf.Project.Employee.Web.Controllers
             }
         }
 
-        public async Task<IActionResult> Require()
+        public async Task<IActionResult> Require(string msg)
         {
+            ViewBag.Duties = await _sysAdminService.GetReferences(ReferenceTypeEnum.Duty);
+            ViewBag.Qualifs = await _sysAdminService.GetReferences(ReferenceTypeEnum.Qualification);
+            ViewBag.Message = msg;
             return View();
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Require(DutyQualifViewModel model)
+        {
+            string msg;
+            try
+            {
+                await _projectService.UpdateRequiredQualifcations(model);
+                msg = "ok";
+            }
+            catch (Exception ex)
+            {
+                msg = "错误：" + ex.Message;
+            }
+            return RedirectToAction(nameof(Require), new { msg = msg });
+        }
+
+        public async Task<JsonResult> SearchProjects(ProjectState? projectState, string searchName, int pageIndex)
+        {
+            var pageSize = 8;
+            var result = await _projectService.SearchProject(projectState, searchName, pageIndex, pageSize);
+            return new JsonResult(new{
+                total=result.Total,
+                projects = result.Records,
+                pageCount = result.Total==0?1
+                        :(result.Total%pageSize==0?result.Total/pageSize
+                            :result.Total/pageSize+1)
+            });
         }
 
         public async Task<IActionResult> Dispatch()
         {
-            return View();
+            var originModel = new RecruitViewModel
+            {
+                PageIndex = 0,
+                PageSize = 20,
+            };
+            return View(await ProcessRecruitViewModel(originModel));
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Dispatch(RecruitViewModel model)
+        {
+            return View(await ProcessRecruitViewModel(model));
         }
     }
 }

@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
+using System.Data;
+using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,6 +17,48 @@ namespace Cnf.Project.Employee.Api.Controllers
     public class ProjectController : EmployeeControllerBase
     {
         public ProjectController(IConfiguration configuration) : base(configuration) { }
+
+        //
+        // api/Project/Search (post CriteriaForProject)
+        //
+
+        [HttpPost("Search")]
+        public async Task<ActionResult<ApiResult<PagedQuery<Entity.Project>>>> Search(CriteriaForProject criteria)
+        {
+            var whereClause = @"
+(@name is null OR [FullName] LIKE '%' + @name + '%'
+ OR [ShortName] LIKE '%' + @name + '%'
+ OR [SitePlace] LIKE '%' + @name + '%'
+ OR [Owner] LIKE '%' + @name + '%'
+ OR [ContractCode] LIKE '%' + @name + '%')";
+            if(criteria.ProjectStatus.HasValue)
+            {
+                whereClause += " AND [Status]=" + ((int)criteria.ProjectStatus).ToString();
+            }
+
+            var sql = DbHelper.BuildPagedSelectSql("*", "tb_project", 
+                whereClause, "[FullName]", criteria.PageIndex, criteria.PageSize);
+            
+            SqlParameter p = new SqlParameter("@name", SqlDbType.NVarChar);
+            if(!string.IsNullOrWhiteSpace(criteria.SearchName))
+                p.Value = criteria.SearchName;
+            else
+                p.Value = DBNull.Value;
+            DataSet ds = await Connector.ExecuteSqlQuerySet(sql, p);
+            PagedQuery<Entity.Project> result = new PagedQuery<Entity.Project>();
+            if (ds != null && ds.Tables.Count == 2)
+            {
+                result.Total = (int)ds.Tables[0].Rows[0][0];
+                ds.Tables[1].TableName = "result";
+                result.Records = await Task.Run(() => ValueHelper.WrapEntities<Entity.Project>(ds.Tables[1]));
+            }
+            else
+            {
+                result.Total = 0;
+                result.Records = new Entity.Project[0];
+            }
+            return Success(result);
+        }
 
         //
         // api/Project/Status/1 (mo id means ignoring status)
@@ -312,7 +356,7 @@ namespace Cnf.Project.Employee.Api.Controllers
         public async Task<ActionResult<ApiResult<PagedQuery<TransferInLog>>>> GetInlogs(
             [FromQuery] int? employeeId, [FromQuery] int? projectId, bool? forCheck)
         {
-            var pageSize = (forCheck == null || forCheck.Value == false)?int.MaxValue:1;
+            var pageSize = (forCheck == null || forCheck.Value == false) ? int.MaxValue : 1;
 
             Dictionary<string, object> criteria = new Dictionary<string, object>();
             if (employeeId.HasValue)
@@ -333,7 +377,7 @@ namespace Cnf.Project.Employee.Api.Controllers
         public async Task<ActionResult<ApiResult<PagedQuery<TransferOutLog>>>> GetOutlogs(
             [FromQuery] int? employeeId, [FromQuery] int? projectId, bool? forCheck)
         {
-            var pageSize = (forCheck == null || forCheck.Value == false)?int.MaxValue:1;
+            var pageSize = (forCheck == null || forCheck.Value == false) ? int.MaxValue : 1;
 
             Dictionary<string, object> criteria = new Dictionary<string, object>();
             if (employeeId.HasValue)
@@ -356,6 +400,31 @@ namespace Cnf.Project.Employee.Api.Controllers
                 Connector, new Dictionary<string, object> { [nameof(DutyQualification.DutyID)] = id },
                 0, int.MaxValue, nameof(DutyQualification.QualificationName), false);
             return Success(requiredPaged);
+        }
+
+        //
+        // api/Project/UpdateRequiredQualifcations json(DutyQualifictionInfo)
+        //
+        [HttpPost("UpdateRequiredQualifcations")]
+        public async Task<ActionResult<ApiResult<bool>>> UpdateRequiredQualifcations(DutyQualificationInfo info)
+        {
+            try
+            {
+                var sql = "DELETE FROM [tr_Duty_Qualification] WHERE DutyID=" + info.DutyID.ToString();
+                await Connector.ExecuteSqlNonQuery(sql);
+                if (info.QualifIDs?.Length > 0)
+                {
+                    foreach (var qualifId in info.QualifIDs)
+                    {
+                        await AddQualification(new { DutyID = info.DutyID, QualificationID = qualifId });
+                    }
+                }
+                return Success(true);
+            }
+            catch (Exception ex)
+            {
+                return Error<bool>(ex.Message);
+            }
         }
 
         //

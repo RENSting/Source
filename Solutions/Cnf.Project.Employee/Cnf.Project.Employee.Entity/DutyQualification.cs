@@ -24,4 +24,11 @@ namespace Cnf.Project.Employee.Entity
         [DbField("QualificationName", FieldType = SqlDbType.NVarChar, Size = 200)]
         public string QualificationName { get; set; }
     }
+
+    public class DutyQualificationInfo
+    {
+        public int DutyID{get;set;}
+
+        public int[] QualifIDs{get;set;}
+    }
 }

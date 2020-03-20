@@ -14,7 +14,11 @@
             <button asp-action="RecuitConfirmed" class="btn btn-danger">确定</button>
         </div>
         <div class="form-group">
-            <button asp-action="RecuitCancelled" class="btn btn-secondary">放弃</button>
+            @if(ViewBag.From == "recruit"){
+                <a asp-action="ListEmployees" asp-route-id="@Model[0].ProjectId" class="btn btn-secondary">放弃</a>
+            }else if(ViewBag.From == "dispatch"){
+                <a asp-action="Dispatch" class="btn btn-secondary">放弃</a>
+            }
         </div>
     </div>
     <table class="table table-sm table-bordered">

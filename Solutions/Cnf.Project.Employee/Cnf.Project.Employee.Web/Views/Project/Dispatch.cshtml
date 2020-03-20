@@ -1,6 +1,8 @@
+@model RecruitViewModel
 
 @{ViewData["Title"] = "调配";}
 
+<form role="form" method="POST">
 <div class="card">
   <div class="card-header">
     <ul class="nav nav-tabs card-header-tabs">
@@ -16,6 +18,296 @@
     </ul>
   </div>
   <div class="card-body">
-      <div class="card-title">调配人员到项目</div>
+    <div class="text-muted small row mb-2">
+        加入项目：查找并选择人员，同时指定计划承担的职责，单击“加入项目”<br/>
+        释放资源：查找选择人员，点击“释放资源”将人员从项目中调出成为自由身份。
+    </div>
+    <div class="form-inline row mb-2">
+        <div class="form-group mr-2">
+            <select asp-for="SelectedOrgId" asp-items="@ViewBag.OrgList" class="form-control form-control-sm">
+                <option value="">-=选择组织=-</option>
+            </select>
+        </div>
+        <div class="form-group mr-2">
+            <select asp-for="SelectedSpecId" asp-items="@ViewBag.SpecList" class="form-control form-control-sm">
+                <option value="">-=选择专业=-</option>
+            </select>
+        </div>
+        <div class="form-group mr-2">
+            <input asp-for="SearchName" class="form-control form-control-sm" placeholder="模糊搜索...">
+        </div>
+        <div class="form-group mr-2">
+            <div class="form-check form-check-inline">
+                <input asp-for="JustFreeOnly" class="form-check-input">
+                <label asp-for="JustFreeOnly" class="form-check-label"></label>
+            </div>
+        </div>
+        <div class="form-group">
+            <button asp-action="Dispatch" class="btn btn-sm btn-success">筛选和查找</button>
+        </div>
+    </div>
+    <div class="row">
+      <table class="table table-sm table-bordered">
+        <thead class="bg-dark text-white">
+            <tr>
+                <th>
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" value="" onclick="checkAll(this);" class="form-check-input">
+                        <label class="form-check-label">全选</label>
+                    </div>
+                </th>
+                <th>计划职责</th>
+                <th>姓名</th>
+                <th>专业</th>
+                <th>目前所在项目</th>
+                <th>目前承担职责</th>
+                <th>加入时间</th>
+                <th>证书</th>
+            </tr>
+        </thead>
+        <tbody>
+        @for(int i = 0; i < Model.Candidates.Length; i++){
+          <tr>
+              <td style="width:5rem;">
+                  @Html.HiddenFor(m=>Model.Candidates[i].EmployeeId)
+                  <div class="form-check form-check-inline" style="vertical-align: middle;">
+                      @Html.EditorFor(m=>Model.Candidates[i].Selected, 
+                          new{@class="form-check-input"})
+                  </div>
+              </td>
+              <td style="width:10rem;">
+                  @Html.DropDownListFor(m=>Model.Candidates[i].RecruitDutyId, 
+                      (IEnumerable<SelectListItem>)ViewBag.DutyList,
+                          new{@class="form-control form-control-sm", style="padding:0;",
+                          onchange="changeDuty(this);"})
+              </td>
+              <td>@Html.HiddenFor(m=>Model.Candidates[i].EmployeeName)
+                  @Html.DisplayFor(m=>Model.Candidates[i].EmployeeName)</td>
+              <td>@Html.HiddenFor(m=>Model.Candidates[i].SpecialityName)
+                  @Html.DisplayFor(m=>Model.Candidates[i].SpecialityName)</td>
+              <td>@Html.DisplayFor(m=>Model.Candidates[i].ProjectName)</td>
+              <td>@Html.DisplayFor(m=>Model.Candidates[i].DutyName)</td>
+              <td>
+                  @if(Model.Candidates[i].ProjectId>0){ @Html.DisplayFor(m=>Model.Candidates[i].EnListDate) }
+              </td>
+              <td data-column="certs" data-employee-id="@Model.Candidates[i].EmployeeId">
+              </td>
+          </tr>
+        }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer">
+    @Html.HiddenFor(m=>m.ProjectId, new{data_field="ProjectId"})
+    @Html.HiddenFor(m=>m.ProjectName, new{data_field="ProjectName"})
+    <nav class="float-right small">
+    @{
+        var pageCount = Model.CalcPageCount();
+        <ul class="pagination mb-0">
+            @Html.HiddenFor(m=>m.PageIndex, new{data_field="PageIndex"})
+            @Html.HiddenFor(m=>m.PageSize)
+            <li class="page-item">
+                <button class="page-link" onclick="setPageIndex(0);" asp-action="Dispatch">&laquo;</button>
+            </li>
+        @for(int i = 0; i < pageCount; i++){
+            string css;
+            if(i == Model.PageIndex){
+                css = "page-item active";
+            }else{
+                css = "page-item";
+            }
+            <li class="@(css)">
+                <button class="page-link" onclick="setPageIndex(@i);" asp-action="Dispatch">@(i+1)</button>
+            </li>
+        }
+            <li class="page-item">
+                <button class="page-link" onclick="setPageIndex(@pageCount-1);" asp-action="Dispatch">&raquo;</button>
+            </li>
+        </ul>
+    }
+    </nav>
+    <button class="btn btn-sm btn-primary"
+        onclick="if(haveSelected()==true)loadProjects('', '', 0);return false;">加入项目</button>
+    <button asp-action="Withdraw" class="btn btn-sm btn-warning">释放资源</button>
   </div>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="selectProject" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="选择要加入的项目" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="form-inline">
+          <div class="form-group mr-2">
+            <select id="selectedProjectStatus" class="form-control form-control-sm"
+              asp-items="@Html.GetEnumSelectList<ProjectState>()">
+                <option value="">-=选择项目状态=-</option>
+              </select>
+          </div>
+          <div class="form-group mr-2">
+            <input type="text" id="nameToSearch" class="form-control form-control-sm" placeholder="模糊搜索...">
+          </div>
+          <div class="form-group">
+            <button class="btn btn-sm btn-success" onclick="searchProjects(0);return false;" type="button">查找</button>
+          </div>
+        </div>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="min-height: 25rem;">
+        <ul class="list-group small" id="projectList">
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <input type="hidden" id="projectPageIndex">
+        <input type="hidden" id="projectPageTotal">
+        <span class="text-dark small pr-4" data-field="ProjectsIndicator"></span>
+        <span style="border:1px solid #D3D3D3;">
+          <button type="button" onclick="gotoPreviousPage();return false;" class="btn btn-sm btn-default">上页</button>
+          <button type="button" onclick="gotoNextPage();return false;" class="btn btn-sm btn-default">下页</button>
+        </span>
+        <button type="submit" asp-action="RecruitConfirm" asp-route-from="dispatch" id="addProject" class="btn btn-sm btn-success">加入项目</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+
+
+@section Scripts{
+    <script type="text/javascript">
+        function setPageIndex(i){
+            $("input[data-field='PageIndex']").val(i);
+        }
+
+        function checkAll(chk){
+            $("td input[type='checkbox']").each(function(){
+                this.checked = chk.checked;
+            });
+        }
+
+        function changeDuty(ddl){
+            var tr = $(ddl).parents("tr");
+            var chk = $(tr).find("input[type='checkbox']");
+            $(chk).prop('checked', true);
+        }
+
+        function haveSelected(){
+            var selectedCount = 0;
+            $("td input[type='checkbox']").each(function(){
+                if(this.checked == true)
+                    selectedCount++;
+            });
+            if(selectedCount>0){
+                return true; //confirm("即将把选中的" + selectedCount + "人加入项目，确定吗？");
+            }
+            else{
+                alert("没有选择任何要加入项目的人员");
+                return false;
+            }
+        }
+
+        function searchProjects(page){
+          var state = $("#selectedProjectStatus").val();
+          var name = $("#nameToSearch").val();
+          loadProjects(state, name, page);
+        }
+
+        function gotoPreviousPage(){
+          var currentPage = parseInt($("#projectPageIndex").val());
+          if(currentPage > 0){
+            currentPage--;
+          }
+          searchProjects(currentPage);
+        }
+
+        function gotoNextPage(){
+          var currentPage = parseInt($("#projectPageIndex").val());
+          var totalPage = parseInt($("#projectPageTotal").val());
+          if(currentPage < totalPage -1){
+            currentPage++;
+          }
+          searchProjects(currentPage);
+        }
+
+        function loadProjects(state, name, page){
+          $("#selectProject").modal("show");
+          $("#projectList").html('<div class="d-flex justify-content-center">'
+              + '<div class="spinner-border" style="width:3rem;height:3rem;" role="status">'
+              + '<span class="sr-only">Loading...</span></div></div>');
+          $("#addProject").attr("disabled", "disabled");
+          $("#projectPageIndex").val(page);
+          var ajaxFunc = $.getJSON(
+            "/Project/SearchProjects",
+            {
+              "projectState": state,
+              "searchName":name,
+              "pageIndex":page
+            }, function(searchResult){
+              $("span[data-field='ProjectsIndicator']").text("共"+searchResult.total+"个项目，" + searchResult.pageCount + "页");
+              $("#projectPageTotal").val(searchResult.pageCount);
+              var liHtml = "";              
+              $.each(searchResult.projects, function(){
+                var li = "<li class='list-group-item' data-group='projects'>";
+                li += "<div class='custom-control custom-radio'>" 
+                    + "<input type='radio' data-project-id='" 
+                    + this.id + "' id='radio" + this.id 
+                    + "' onchange='changeSelectedProject(this);'"
+                    + " name='project' class='custom-control-input'>"
+                    + "<label class='custom-control-label' for='radio" + this.id
+                    + "''>" + this.fullName +" </label></div>";
+                li += "</li>";
+                liHtml += li;
+              });
+              $("#projectList").html(liHtml);
+            });
+          @* $.when(ajaxFunc).done(function(){
+            
+          }); *@
+        }
+
+        function changeSelectedProject(radio){
+          $("li[data-group='projects']").removeClass("active");
+          $(radio).parents("li[data-group='projects']").addClass("active");
+          $("input[data-field='ProjectId']").val($(radio).data("project-id"));
+          $("input[data-field='ProjectName'").val($(radio).parents("li").find("label").text());
+          $("#addProject").removeAttr("disabled");
+        }
+
+        function buildCerts(){
+            var spinDiv = '<div class="spinner-border spinner-border-sm text-dark" role="status">' 
+                    +'<span class="sr-only">Loading...</span>' + '</div>';
+            $("td[data-column='certs']").each(function(){
+                var td=this;
+                $(td).html(spinDiv);
+                
+                var employeeId = $(this).attr("data-employee-id");
+                var url = "/Project/GetCertsOfEmployee?employeeId=" + employeeId;
+                $.getJSON(url, function(certArray){
+                    var title = '';
+                    $.each(certArray, function(){
+                        var li = '';
+                        li = li + this.name + '(有效期：' + this.expireDate.slice(0,10) + ')';
+                        li = li + '';
+                        title = (title.length>0?title+'<br/>':title) + li;
+                    });
+                    title += "";
+                    var css = "badge badge-primary";
+                    var span = "<span data-toggle='tooltip' data-html='true' class='" + css + 
+                                "' title='" + title + 
+                                "'>" + certArray.length + "个证书" + "</span>";
+                    $(td).html(span);
+                    $(td).children("span").tooltip();
+                });
+            });
+        }
+
+        $(function(){
+          buildCerts();
+        });
+
+    </script>
+}

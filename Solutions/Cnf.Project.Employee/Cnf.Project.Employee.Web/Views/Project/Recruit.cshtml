@@ -2,6 +2,7 @@
 
 @{ViewData["Title"]="添加人员";}
 
+<form role="form" method="POST">
 <div class="card">
     <div class="card-header text-center">
         准备加入：@Model.ProjectName
@@ -9,7 +10,6 @@
             class="float-left btn btn-default m-0 p-0 text-primary">返回</a>
     </div>
     <div class="card-body pt-2">
-<form role="form" method="POST">
     <div class="text-muted small row mb-2">
         查找并选择人员，同时为他们指定加入项目后计划承担的职责
     </div>
@@ -93,17 +93,47 @@
         }
             </tbody>
         </table>
-        <div class="form-group">
-            <button asp-action="RecruitConfirm" class="btn btn-primary"
-                onclick="if(haveSelected()==false)return false;">选中人员加入项目</button>
-        </div>
     </div>
-</form> 
+    </div>
+    <div class="card-footer">
+        <nav class="float-right">
+        @{
+            var pageCount = Model.CalcPageCount();
+            <ul class="pagination mb-0">
+                @Html.HiddenFor(m=>m.PageIndex, new{data_field="PageIndex"})
+                @Html.HiddenFor(m=>m.PageSize)
+                <li class="page-item">
+                    <button class="page-link" onclick="setPageIndex(0);" asp-action="Recruit">&laquo;</button>
+                </li>
+            @for(int i = 0; i < pageCount; i++){
+                string css;
+                if(i == Model.PageIndex){
+                    css = "page-item active";
+                }else{
+                    css = "page-item";
+                }
+                <li class="@(css)">
+                    <button class="page-link" onclick="setPageIndex(@i);" asp-action="Recruit">@(i+1)</button>
+                </li>
+            }
+                <li class="page-item">
+                    <button class="page-link" onclick="setPageIndex(@pageCount-1);" asp-action="Recruit">&raquo;</button>
+                </li>
+            </ul>
+        }
+        </nav>
+        <button asp-action="RecruitConfirm" asp-route-from="recruit" class="btn btn-primary"
+            onclick="if(haveSelected()==false)return false;">选中人员加入项目</button>
     </div>
 </div>
+</form> 
 
 @section Scripts{
     <script type="text/javascript">
+        function setPageIndex(i){
+            $("input[data-field='PageIndex']").val(i);
+        }
+
         function checkAll(chk){
             $("td input[type='checkbox']").each(function(){
                 this.checked = chk.checked;

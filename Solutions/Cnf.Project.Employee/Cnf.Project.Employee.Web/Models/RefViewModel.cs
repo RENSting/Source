@@ -40,4 +40,14 @@ namespace Cnf.Project.Employee.Web.Models
                 type == "资格类型"? ReferenceTypeEnum.Qualification:
                         throw(new Exception("Error refenrect type name"));
     }
+
+    public class DutyQualifViewModel
+    {
+        public int DutyId{get;set;}
+        /// <summary>
+        /// 用逗号（,）分割的资格类型ID字符串，表示选中的资格类型。
+        /// </summary>
+        /// <value></value>
+        public string QualifIds{get;set;}
+    }
 }

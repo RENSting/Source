@@ -1,5 +1,11 @@
+@using Cnf.Project.Employee.Entity
+@model DutyQualifViewModel
 
-@{ViewData["Title"] = "资质";}
+@{
+  ViewData["Title"] = "资质";
+  var duties = (Reference[])ViewBag.Duties;
+  var qualifs = (Reference[])ViewBag.Qualifs;
+}
 
 <div class="card">
   <div class="card-header">
@@ -16,6 +22,116 @@
     </ul>
   </div>
   <div class="card-body">
-      <div class="card-title">管理任职资格</div>
+      <div class="card-title">管理职责要求的任职资格</div>
+    @if(!string.IsNullOrWhiteSpace(ViewBag.Message)){
+      var css = @ViewBag.Message == "ok"?"alert-success":"alert-danger";
+      var txt = @ViewBag.Message == "ok"?"资格要求成功保存":ViewBag.Message;
+      <div class="alert @(css) alert-dismissible fade show">
+        @txt
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    }
+      <p class="text-muted small">
+        使用本页面对系统中定义的职责和所需任职资格类型进行关联，如果职责和资格类型在列表中没有出现，请使用系统管理模块添加它们。
+      </p>
+      <div class="card-deck">
+        <div class="card">
+          <div class="card-header">
+            已定义的职责
+          </div>
+          <div class="card-body">
+            <p class="text-muted small">
+              选中一个职责可查看它的任职资格
+            </p>
+            <ul class="list-group">
+          @for(int i = 0; i<duties.Length; i++){
+            <li data-group="duties" class="list-group-item">
+              <div class="custom-control custom-radio">
+                <input type="radio" data-duty-id="@duties[i].ID" data-duty-name="@duties[i].ReferenceValue"
+                  onchange="selectDuty(this);"
+                  id="radio@(i)" name="duty" class="custom-control-input">
+                <label class="custom-control-label" for="radio@(i)">
+                  @(duties[i].ReferenceValue)(@duties[i].ReferenceCode)</label>
+              </div>
+            </li>
+          }
+            </ul>
+          </div>
+          <div class="card-footer" style="height: 3.5rem;">
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            已定义的资格类型
+          </div>
+          <div class="card-body">
+            <p id="qualif-title" class="text-muted small">
+              请从左侧选择一个职责
+            </p>
+            <ul class="list-group">
+          @for(int i = 0; i<qualifs.Length; i++){
+            <li class="list-group-item">
+              <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" disabled="disabled" 
+                  id="switch@(i)" data-qualif-id="@qualifs[i].ID">
+                <label class="custom-control-label" for="switch@(i)">
+                  @(qualifs[i].ReferenceValue)(@qualifs[i].ReferenceCode)</label>
+              </div>
+            </li>
+          }
+            </ul>
+          </div>
+          <div class="card-footer" style="height: 3.5rem;">
+            <form method="POST">
+              @Html.HiddenFor(m=>m.DutyId, new{model_field="DutyId"})
+              @Html.HiddenFor(m=>m.QualifIds, new{model_field="QualifIds"})
+              <button id="commit-change" disabled="disabled" asp-action="Require"
+                onclick="if(setNeedQualifs()==false)return false;" class="btn btn-sm btn-primary">提交保存</button>
+            </form>
+          </div>
+        </div>
+      </div>
   </div>
 </div>
+
+@section Scripts{
+  <script type="text/javascript">
+    function setNeedQualifs(){
+      var qualifIdString = "";
+      $("input[type='checkbox']").each(function(){
+        if($(this).prop("checked")==true){
+          qualifIdString += "," + $(this).attr("data-qualif-id");
+        }
+      });
+      if(qualifIdString.length > 0){
+        qualifIdString = qualifIdString.substr(1);
+      }
+      $("input[model-field='QualifIds']").val(qualifIdString);
+      return true;
+    }
+
+    function selectDuty(radio){
+      $("li[data-group='duties']").removeClass("active");
+      $(radio).parents("li[data-group='duties']").addClass("active");
+      $("#commit-change").attr("disabled", "disabled");
+      $("input[type='checkbox'").attr("disabled", "disabled");
+
+      var dutyId = $(radio).attr("data-duty-id");
+      var dutyName = $(radio).attr("data-duty-name");
+      $("input[model-field='DutyId']").val(dutyId);
+      $.getJSON("/Project/GetDutyQualifications?dutyId=" + dutyId, function(needQualifs){
+        $("input[type='checkbox']").prop("checked", false);
+        $.each(needQualifs, function(){
+          var selector = "input[data-qualif-id='" + this.qualificationID + "']";
+          $(selector).prop("checked", true);
+        });
+
+        $("#commit-change").removeAttr("disabled");
+        $("#qualif-title").html(dutyName +' 需要的资格');
+        $("input[type='checkbox'").removeAttr("disabled");
+      });
+    }
+  </script>
+}
