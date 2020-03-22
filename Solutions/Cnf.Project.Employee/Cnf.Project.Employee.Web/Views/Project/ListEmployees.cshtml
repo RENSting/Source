@@ -74,8 +74,8 @@ else{
                     title = (title.length>0?title+'<br/>':title) + li;
                 });
                 title+="";
-                var css = "badge " + (state.state=="None"?"badge-danger"
-                                :(state.state=="Partially"?"badge-warning":"badge-success"));
+                var css = "badge " + (state.state==0?"badge-danger"
+                                :(state.state==1?"badge-warning":"badge-success"));
                 var text = state.state==0?"无资格":(state.state==1?"部分满足":"完全满足");
                 var span = "<span class='" + css + "' title='" + title + 
                             "'>" + text + "</span>";

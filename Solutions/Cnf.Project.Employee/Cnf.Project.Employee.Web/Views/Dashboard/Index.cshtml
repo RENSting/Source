@@ -1,0 +1,78 @@
+@model Cnf.Project.Employee.Entity.GroupPivot
+
+@{
+    ViewData["Title"] = "项目分布";
+}
+
+<div class="card">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" asp-action="Index">项目分布</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" asp-action="QualifDist">单位分布</a>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+    <table class="table table-sm table-bordered">
+        <thead class="bg-dark text-white">
+            <tr>
+                <th>项目名称</th>
+                @foreach(var column in Model.PivotValueKeys){
+                    <th>@column</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.StaffRows){
+                <tr>
+                <td>@Html.DisplayFor(m=>item.GroupName)</td>
+                @foreach (var column in Model.PivotValueKeys){
+                    <td>
+                    @foreach (var staff in item.Staffs[column]){
+                        <span class="badge" 
+                            data-category="staff" 
+                            data-employee-id="@staff.EmployeeID"
+                            data-duty-id="@staff.DutyID">
+                            @staff.EmployeeName
+                        </span>
+                    }
+                    </td>
+                }
+                </tr>
+            }
+        </tbody>
+    </table>
+  </div>
+</div>
+
+@section Scripts{
+  <script type="text/javascript">
+    $(function(){
+      $("span[data-category='staff']").each(function(){
+        var eid = $(this).data("employee-id");
+        var did = $(this).data("duty-id");
+        var url = "/project/GetQualifyState?employeeId=" + eid + "&dutyId=" + did;
+        var span = this;
+        $.getJSON(url, function(state){
+            var title = "";
+            $.each(state.certs, function(){
+                var li = '';
+                li = li + this.name + '(有效期：' + this.expireDate.slice(0,10) + ')';
+                li = li + '';
+                title = (title.length>0?title+'<br/>':title) + li;
+            });
+            title+="";
+            var css = state.state==0?"badge-danger"
+                      :(state.state==1?"badge-warning":"badge-success");
+            $(span).addClass(css);
+            $(span).attr("title", title);
+            $(span).tooltip();
+        });
+      });
+    });
+  </script>
+}
+

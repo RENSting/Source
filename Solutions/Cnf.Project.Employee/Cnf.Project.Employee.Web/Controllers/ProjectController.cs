@@ -328,12 +328,13 @@ namespace Cnf.Project.Employee.Web.Controllers
         {
             var pageSize = 8;
             var result = await _projectService.SearchProject(projectState, searchName, pageIndex, pageSize);
-            return new JsonResult(new{
-                total=result.Total,
+            return new JsonResult(new
+            {
+                total = result.Total,
                 projects = result.Records,
-                pageCount = result.Total==0?1
-                        :(result.Total%pageSize==0?result.Total/pageSize
-                            :result.Total/pageSize+1)
+                pageCount = result.Total == 0 ? 1
+                        : (result.Total % pageSize == 0 ? result.Total / pageSize
+                            : result.Total / pageSize + 1)
             });
         }
 
@@ -351,6 +352,16 @@ namespace Cnf.Project.Employee.Web.Controllers
         public async Task<IActionResult> Dispatch(RecruitViewModel model)
         {
             return View(await ProcessRecruitViewModel(model));
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Withdraw(RecruitViewModel model)
+        {
+            foreach (var staff in model.Candidates)
+            {
+                await _projectService.Transfer(staff.EmployeeId, 0, 0, UserHelper.GetUserID(HttpContext));
+            }
+            return RedirectToAction(nameof(Dispatch));
         }
     }
 }

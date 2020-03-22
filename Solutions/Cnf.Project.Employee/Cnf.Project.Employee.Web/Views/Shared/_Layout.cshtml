@@ -31,6 +31,12 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">主页</a>
                         </li>
+                        @if(UserHelper.IsManager(Context))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="Index">看板</a>
+                            </li>
+                        }
                         @if (UserHelper.IsSystemAdmin(Context))
                         {
                             <li class="nav-item">

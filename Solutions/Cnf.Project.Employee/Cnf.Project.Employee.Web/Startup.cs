@@ -35,6 +35,7 @@ namespace Cnf.Project.Employee.Web
             services.AddScoped<ISysAdminService, SysAdminService>();
             services.AddScoped<IEmployeeService, EmployeeService>();
             services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<IAnalysisService, AnalysisService>();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -69,50 +70,69 @@ namespace Cnf.Project.Employee.Web
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.Use( async (context, next) =>
-           {
-               //System.Text.StringBuilder builder = new System.Text.StringBuilder();
-               //builder.Append($"PathBase={context.Request.PathBase}  ");
-               //builder.Append($"Path={context.Request.Path} ");
-               //builder.Append($"Hotst={context.Request.Host} ");
-               //builder.Append($"Protocol={context.Request.Protocol} ");
-               //builder.Append($"QueryString={context.Request.QueryString} ");
-               //builder.Append($"Scheme={context.Request.Scheme} ");
+            app.Use(async (context, next) =>
+          {
+              //System.Text.StringBuilder builder = new System.Text.StringBuilder();
+              //builder.Append($"PathBase={context.Request.PathBase}  ");
+              //builder.Append($"Path={context.Request.Path} ");
+              //builder.Append($"Hotst={context.Request.Host} ");
+              //builder.Append($"Protocol={context.Request.Protocol} ");
+              //builder.Append($"QueryString={context.Request.QueryString} ");
+              //builder.Append($"Scheme={context.Request.Scheme} ");
 
-               //await context.Response.WriteAsync(builder.ToString());
+              //await context.Response.WriteAsync(builder.ToString());
 
-               string path = context.Request.Path.Value.ToLower();
-               if(path == "/" || path.StartsWith("/home"))
-               {
-                   await next.Invoke();
-               }
-               else if(path.StartsWith("/system"))
-               {
-                   if(UserHelper.IsSystemAdmin(context))
-                   {
-                       await next.Invoke();
-                   }
-                   else
-                   {
-                       context.Response.Redirect("/Home/Denied");
-                   }
-               }
-               else if(path.StartsWith("/employee"))
-               {
-                   if(UserHelper.IsHumanResourceAdmin(context))
-                   {
-                       await next.Invoke();
-                   }
-               }
-               else if(path.StartsWith("/project"))
-               {
-                   if(UserHelper.IsProjectAdmin(context))
-                   {
-                       await next.Invoke();
-                   }
-               }
+              string path = context.Request.Path.Value.ToLower();
+              if (path == "/" || path.StartsWith("/home"))
+              {
+                  await next.Invoke();
+              }
+              else if (path.StartsWith("/system"))
+              {
+                  if (UserHelper.IsSystemAdmin(context))
+                  {
+                      await next.Invoke();
+                  }
+                  else
+                  {
+                      context.Response.Redirect("/Home/Denied");
+                  }
+              }
+              else if (path.StartsWith("/employee"))
+              {
+                  if (UserHelper.IsHumanResourceAdmin(context))
+                  {
+                      await next.Invoke();
+                  }
+              }
+              else if (path.StartsWith("/project"))
+              {
+                  if (path.StartsWith("/project/getqualifystate")
+                        || path.StartsWith("/project/getdutyqualifications")
+                        || path.StartsWith("/project/getcertsofemployee")
+                        || path.StartsWith("/project/verifytransfer")
+                        || path.StartsWith("/project/searchprojects"))
+                  {
+                      //ajax api, won't authenticate them
+                      await next.Invoke();
+                  }
+                  else
+                  {
+                      if (UserHelper.IsProjectAdmin(context))
+                      {
+                          await next.Invoke();
+                      }
+                  }
+              }
+              else if (path.StartsWith("/dashboard"))
+              {
+                  if (UserHelper.IsManager(context))
+                  {
+                      await next.Invoke();
+                  }
+              }
 
-           });
+          });
 
             app.UseEndpoints(endpoints =>
             {

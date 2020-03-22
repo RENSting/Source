@@ -1,0 +1,48 @@
+@model Cnf.Project.Employee.Entity.GroupPivot
+
+@{
+    ViewData["Title"] = "单位分布";
+}
+
+<div class="card">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs">
+      <li class="nav-item">
+        <a class="nav-link" asp-action="Index">项目分布</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" asp-action="QualifDist">单位分布</a>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+    <table class="table table-sm table-bordered">
+        <thead class="bg-dark text-white">
+            <tr>
+                <th>单位名称</th>
+                @foreach(var column in Model.PivotValueKeys){
+                    <th>@column</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.StaffRows){
+                <tr>
+                <td>@Html.DisplayFor(m=>item.GroupName)</td>
+                @foreach (var column in Model.PivotValueKeys){
+                    <td>
+                    @foreach (var staff in item.Staffs[column]){
+                        <span class="badge" 
+                            data-category="staff" 
+                            data-employee-id="@staff.EmployeeID">
+                            @staff.EmployeeName
+                        </span>
+                    }
+                    </td>
+                }
+                </tr>
+            }
+        </tbody>
+    </table>
+  </div>
+</div>

@@ -129,7 +129,15 @@
     </nav>
     <button class="btn btn-sm btn-primary"
         onclick="if(haveSelected()==true)loadProjects('', '', 0);return false;">加入项目</button>
-    <button asp-action="Withdraw" class="btn btn-sm btn-warning">释放资源</button>
+    <button asp-action="Withdraw" class="btn btn-sm btn-warning"
+      onclick="
+if(haveSelected()==true){
+  if(confirm('所有选择的人员将被设为自由的，确定吗？')==false){
+    return false;
+  }
+}else{
+  return false;
+}">释放资源</button>
   </div>
 </div>
 
