@@ -1,0 +1,84 @@
+@model ResumeViewModel
+
+@{
+    ViewData["Title"]="履历";
+}
+
+<div class="card">
+    <div class="card-header">
+        @if(Model.ActiviteStatus){
+            <span class="badge badge-success float-right">有效</span>
+        }else{
+            <span class="badge badge-secondary float-right">已停用</span>
+        }
+        <div class="card-title mb-0">@Model.EmployeeName</div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-4">所属单位：@Model.OrganizationName</div>
+            <div class="col-2">职务：@Model.Title</div>
+            <div class="col-2">专业：@Model.SpecialtyName</div>
+        </div>
+        <div class="row">
+            <div class="col-6">所在项目：@Model.CurrentProjectName</div>
+            <div class="col-6">承担职责：@Model.CurrentDutyName</div>
+        </div>
+        <div class="card-deck mt-4">
+            <div class="card">
+                <div class="card-header text-center text-white bg-info p-2">
+                    员工持有的证书
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-bordered small">
+                        <thead class="text-white bg-info">
+                            <th>@Html.DisplayNameFor(m=>m.Certifications[0].CertName)</th>
+                            <th>@Html.DisplayNameFor(m=>m.Certifications[0].AuthorityUnit)</th>
+                            <th>@Html.DisplayNameFor(m=>m.Certifications[0].CertifyingDate)</th>
+                            <th>@Html.DisplayNameFor(m=>m.Certifications[0].ExpireDate)</th>
+                            <th>可用</th>
+                        </thead>
+                        <tbody>
+                            @foreach(var cert in Model.Certifications){
+                                <tr>
+                                    <td>@Html.DisplayFor(m=>cert.CertName)</td>
+                                    <td>@Html.DisplayFor(m=>cert.AuthorityUnit)</td>
+                                    <td>@Html.DisplayFor(m=>cert.CertifyingDate)</td>
+                                    <td>@Html.DisplayFor(m=>cert.ExpireDate)</td>
+                                    <td>@Html.DisplayFor(m=>cert.ActiveStatus)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header text-center text-white bg-success p-2">
+                    项目履历
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-bordered small">
+                        <thead class="text-white bg-success">
+                            <th>@Html.DisplayNameFor(m=>m.Logs[0].Date)</th>
+                            @* <th>@Html.DisplayNameFor(m=>m.Logs[0].LogType)</th> *@
+                            <th colspan="2">调出项目</th>
+                            <th colspan="2">调入项目</th>
+                        </thead>
+                        <tbody>
+                            @foreach(var item in Model.Logs){
+                                <tr>
+                                    <td>@Html.DisplayFor(m=>item.Date)</td>
+                                    @* <td>@Html.DisplayFor(m=>item.LogType)</td> *@
+                                    <td>@Html.DisplayFor(m=>item.FromProject)</td>
+                                    <td>@Html.DisplayFor(m=>item.FromDuty)</td>
+                                    <td>@Html.DisplayFor(m=>item.ToProject)</td>
+                                    <td>@Html.DisplayFor(m=>item.ToDuty)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

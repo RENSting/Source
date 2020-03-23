@@ -26,11 +26,11 @@ namespace Cnf.Project.Employee.Api.Controllers
         public AnalysisController(IConfiguration configuration) : base(configuration) { }
 
         //
-        // api/Analysis/DistributionInProject
+        // api/Analysis/DistributionInProject?activeOnly=true/false/null
         //
 
         [HttpGet("DistributionInProject")]
-        public async Task<ActionResult<ApiResult<GroupPivot>>> ProjectDistribution()
+        public async Task<ActionResult<ApiResult<GroupPivot>>> ProjectDistribution(bool? activeOnly)
         {
             var dutyQuery = await GetRerencesByType(ReferenceTypeEnum.Duty);
             StringBuilder dutyListBuilder = new StringBuilder();
@@ -41,17 +41,21 @@ namespace Cnf.Project.Employee.Api.Controllers
             if(dutyListBuilder.Length > 0)
                 dutyListBuilder.Remove(0, 2);
             
+            string hideInactive = activeOnly==null?"":activeOnly.Value?"[ActiveStatus]=1":"";
+            
             string sql = @"
 WITH base AS (
     SELECT ProjectName, DutyName, 
-           STUFF((SELECT ',' + CONVERT(nvarchar(max), ID)+ '|' + Name + '|' + CONVERT(NVARCHAR(max), InDutyID)
+           STUFF((SELECT ',' + CONVERT(nvarchar(max), ID)+ '|' + Name + '|'
+                    + CONVERT(NVARCHAR(max), ActiveStatus) + '|' + CONVERT(NVARCHAR(max), InDutyID)
                     FROM tb_employee
                     WHERE ProjectName = e.ProjectName
                         AND DutyName = e.DutyName
                     FOR xml PATH('')
                 ), 1, 1, '') AS EmployeeName
     FROM tb_employee e
-    WHERE ISNULL(ProjectName, '') <> ''
+    WHERE ISNULL(ProjectName, '') <> ''" 
+        + (string.IsNullOrEmpty(hideInactive)?"":(" AND " + hideInactive)) + @"
     GROUP BY ProjectName, DutyName
 )
 SELECT ProjectName AS [项目名称]," + dutyListBuilder.ToString() + @" 
@@ -69,11 +73,11 @@ FROM base
         }
 
         //
-        // api/Analysis/DistributionInOrganization
+        // api/Analysis/DistributionInOrganization?activeOnly=true/false/null
         //
 
         [HttpGet("DistributionInOrganization")]
-        public async Task<ActionResult<ApiResult<GroupPivot>>> OrganizationDistribution()
+        public async Task<ActionResult<ApiResult<GroupPivot>>> OrganizationDistribution(bool? activeOnly)
         {
             var qualifQuery = await GetRerencesByType(ReferenceTypeEnum.Qualification);
             StringBuilder qualifListBuilder = new StringBuilder();
@@ -84,14 +88,18 @@ FROM base
             if(qualifListBuilder.Length > 0)
                 qualifListBuilder.Remove(0, 2);
             
+            string hideInactive = activeOnly==null?"":activeOnly.Value?"e.[ActiveStatus]=1":"";
+
             string sql = @"
 WITH src AS (
     SELECT  o.Name AS OrgName, 
             r.ReferenceValue AS QualifName, 
-            CONVERT(NVARCHAR(MAX), e.ID) + '|' + e.Name AS EmployeeName
+            CONVERT(NVARCHAR(MAX), e.ID) + '|' + e.Name 
+            + '|' + CONVERT(NVARCHAR(max), e.ActiveStatus) AS EmployeeName
     FROM tb_employee e INNER JOIN tb_organization o ON e.OrganizationID=o.ID
             INNER JOIN tb_certification c ON e.ID=c.EmployeeID
-            INNER JOIN tb_reference r ON c.QualificationID = r.ID
+            INNER JOIN tb_reference r ON c.QualificationID = r.ID"
+        + (string.IsNullOrEmpty(hideInactive)?"":(" WHERE " + hideInactive)) + @"
 )
 SELECT OrgName AS [单位名称], " + qualifListBuilder.ToString() + @" 
 FROM (

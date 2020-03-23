@@ -6,12 +6,19 @@
 
 <div class="card">
   <div class="card-header">
+    <div class="float-right">
+      @if(ViewBag.IncludeInactive){
+        <a asp-action="Index" asp-route-activeonly="1" class="btn btn-sm btn-default p-0 m-0">仅显示有效人员</a>
+      }else{
+        <a asp-action="Index" asp-route-activeonly="0" class="btn btn-sm btn-default p-0 m-0">显示所有人员</a>
+      }
+    </div>
     <ul class="nav nav-tabs card-header-tabs">
       <li class="nav-item">
-        <a class="nav-link active" asp-action="Index">项目分布</a>
+        <a class="nav-link active" asp-action="Index">项目-职责分布</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" asp-action="QualifDist">单位分布</a>
+        <a class="nav-link" asp-action="QualifDist">单位-资格分布</a>
       </li>
     </ul>
   </div>
@@ -32,12 +39,15 @@
                 @foreach (var column in Model.PivotValueKeys){
                     <td>
                     @foreach (var staff in item.Staffs[column]){
+                      <a asp-action="Resume" asp-route-id="@staff.EmployeeID">
                         <span class="badge" 
                             data-category="staff" 
                             data-employee-id="@staff.EmployeeID"
-                            data-duty-id="@staff.DutyID">
+                            data-duty-id="@staff.DutyID"
+                            data-active-status="@staff.ActiveStatus">
                             @staff.EmployeeName
                         </span>
+                      </a>
                     }
                     </td>
                 }
@@ -54,6 +64,7 @@
       $("span[data-category='staff']").each(function(){
         var eid = $(this).data("employee-id");
         var did = $(this).data("duty-id");
+        var active =$(this).data("active-status");
         var url = "/project/GetQualifyState?employeeId=" + eid + "&dutyId=" + did;
         var span = this;
         $.getJSON(url, function(state){
@@ -65,7 +76,7 @@
                 title = (title.length>0?title+'<br/>':title) + li;
             });
             title+="";
-            var css = state.state==0?"badge-danger"
+            var css = active==0?"badge-secondary":state.state==0?"badge-danger"
                       :(state.state==1?"badge-warning":"badge-success");
             $(span).addClass(css);
             $(span).attr("title", title);

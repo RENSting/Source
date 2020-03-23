@@ -24,12 +24,12 @@ namespace Cnf.Project.Employee.Web.Models
         public string AuthorityUnit { get; set; }
 
         [Display(Name="颁证日期")]
-        [DisplayFormat(DataFormatString = "{0:yyyy月MM月dd日}")]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
         [DataType(DataType.Date)]
         public DateTime CertifyingDate { get; set; }
 
         [Display(Name="有效期到")]
-        [DisplayFormat(DataFormatString = "{0:yyyy月MM月dd日}")]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
         [DataType(DataType.Date)]
         public DateTime ExpireDate { get; set; }
 

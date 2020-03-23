@@ -104,6 +104,10 @@ namespace Cnf.Project.Employee.Web
                   {
                       await next.Invoke();
                   }
+                  else
+                  {
+                      context.Response.Redirect("/Home/Denied");
+                  }
               }
               else if (path.StartsWith("/project"))
               {
@@ -122,6 +126,10 @@ namespace Cnf.Project.Employee.Web
                       {
                           await next.Invoke();
                       }
+                      else
+                      {
+                          context.Response.Redirect("/Home/Denied");
+                      }
                   }
               }
               else if (path.StartsWith("/dashboard"))
@@ -130,6 +138,14 @@ namespace Cnf.Project.Employee.Web
                   {
                       await next.Invoke();
                   }
+                  else
+                  {
+                      context.Response.Redirect("/Home/Denied");
+                  }
+              }
+              else
+              {
+                  context.Response.Redirect("/Home/Denied");
               }
 
           });

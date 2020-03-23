@@ -13,6 +13,7 @@ namespace Cnf.Project.Employee.Entity
         public int EmployeeID { get; set; }
         public string EmployeeName { get; set; }
         public int DutyID { get; set; }
+        public int ActiveStatus{get;set;}
 
         public static implicit operator Staff(string label)
         {
@@ -23,7 +24,8 @@ namespace Cnf.Project.Employee.Entity
             {
                 EmployeeID = Convert.ToInt32(parts[0]),
                 EmployeeName = parts[1],
-                DutyID = parts.Length > 2 ? Convert.ToInt32(parts[2]) : default(int),
+                ActiveStatus = Convert.ToInt32(parts[2]),
+                DutyID = parts.Length > 3 ? Convert.ToInt32(parts[3]) : default(int),
             };
         }
     }
@@ -88,7 +90,7 @@ namespace Cnf.Project.Employee.Entity
         /// 从DataTable隐式转换，必须是符合格式要求的记录集，要求如下：
         /// 1. 表列： 第一列是分组名称，如：“项目名称”、“单位名称”， 后面每一个列名称对应一个维度名称，如“职责名称“、资格类型；
         /// 2. 每一行第二列起：值要么是NULL， 要么是逗号（，）分割的字符串，每个分割节表示一个Staff
-        /// 3. 每个分割节表示的Staff都是有ID、Name和InDutyID拼接成的，中间用竖线（|）分割。
+        /// 3. 每个分割节表示的Staff都是有ID、Name、ActiveStatus和InDutyID拼接成的，中间用竖线（|）分割。
         /// </summary>
         /// <param name="table"></param>
         public static implicit operator GroupPivot(DataTable table)
