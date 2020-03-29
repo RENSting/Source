@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Server.Kestrel;
+using System.Net;
 
 namespace Cnf.Project.Employee.Api
 {
@@ -20,6 +22,14 @@ namespace Cnf.Project.Employee.Api
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.UseKestrel(options=>
+                    {
+                        options.Listen(IPAddress.Any, 5000);
+                        options.Listen(IPAddress.Any, 5001, options=>
+                        {
+                            options.UseHttps();
+                        });
+                    });
                     webBuilder.UseStartup<Startup>();
                 });
     }
