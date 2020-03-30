@@ -22,15 +22,19 @@ namespace Cnf.Project.Employee.Api
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseKestrel(options=>
-                    {
-                        options.Listen(IPAddress.Any, 5000);
-                        options.Listen(IPAddress.Any, 5001, options=>
-                        {
-                            options.UseHttps();
-                        });
-                    });
-                    webBuilder.UseStartup<Startup>();
+                    var config = new ConfigurationBuilder()
+                        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                        .Build();
+                    // webBuilder.UseKestrel(options=>
+                    // {
+                    //     // options.Listen(IPAddress.Any, 4000);
+                    //     options.Listen(IPAddress.Any, 5000);
+                    //     // options.Listen(IPAddress.Any, 5001, options=>
+                    //     // {
+                    //     //     options.UseHttps();
+                    //     // });
+                    // });
+                    webBuilder.UseConfiguration(config).UseStartup<Startup>();
                 });
     }
 }

@@ -21,7 +21,7 @@
             }
         </div>
     </div>
-    <table class="table table-sm table-bordered">
+    <table class="table table-sm table-bordered small">
         <thead class="bg-dark text-white">
             <tr>
                 <th>姓名</th>
@@ -39,10 +39,10 @@
             <td>@Html.DisplayFor(m=>Model[i].EmployeeName)</td>
             <td>@Html.DisplayFor(m=>Model[i].SpecialityName)</td>
             <td>@Html.DisplayFor(m=>Model[i].ProjectName)</td>
-            <td class="py-0">@Html.DropDownListFor(m=>Model[i].DutyId, 
+            <td style="padding:2px;" class="py-0">@Html.DropDownListFor(m=>Model[i].DutyId, 
                 (IEnumerable<SelectListItem>)ViewBag.DutyList,
                     new{@class="form-control form-control-sm", 
-                        style="padding:0;", onchange="changeDuty(this);"})</td>
+                        style="padding:0; height:23px;", onchange="changeDuty(this);"})</td>
             <td data-column="message" data-employee-id="@Model[i].EmployeeId" 
                 data-duty-id="@Model[i].DutyId" data-project-id="@Model[i].ProjectId">
             </td>

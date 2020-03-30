@@ -47,7 +47,7 @@
         </div>
     </div>
     <div class="row">
-      <table class="table table-sm table-bordered">
+      <table class="table table-sm table-bordered small">
         <thead class="bg-dark text-white">
             <tr>
                 <th>
@@ -75,10 +75,10 @@
                           new{@class="form-check-input"})
                   </div>
               </td>
-              <td style="width:10rem;">
+              <td style="width:10rem; padding:2px;">
                   @Html.DropDownListFor(m=>Model.Candidates[i].RecruitDutyId, 
                       (IEnumerable<SelectListItem>)ViewBag.DutyList,
-                          new{@class="form-control form-control-sm", style="padding:0;",
+                          new{@class="form-control form-control-sm", style="padding:0; height:23px;",
                           onchange="changeDuty(this);"})
               </td>
               <td>@Html.HiddenFor(m=>Model.Candidates[i].EmployeeName)
@@ -259,7 +259,7 @@ if(haveSelected()==true){
               $("#projectPageTotal").val(searchResult.pageCount);
               var liHtml = "";              
               $.each(searchResult.projects, function(){
-                var li = "<li class='list-group-item' data-group='projects'>";
+                var li = "<li class='list-group-item py-2' data-group='projects'>";
                 li += "<div class='custom-control custom-radio'>" 
                     + "<input type='radio' data-project-id='" 
                     + this.id + "' id='radio" + this.id 
@@ -304,7 +304,7 @@ if(haveSelected()==true){
                     });
                     title += "";
                     var css = "badge badge-primary";
-                    var span = "<span data-toggle='tooltip' data-html='true' class='" + css + 
+                    var span = "<span style='font-size:85%;' data-toggle='tooltip' data-html='true' class='" + css + 
                                 "' title='" + title + 
                                 "'>" + certArray.length + "个证书" + "</span>";
                     $(td).html(span);

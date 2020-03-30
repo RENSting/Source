@@ -34,13 +34,13 @@
 
 @if(@Model.Data != null && Model.Data.Length > 0)
 {
-      <table class="table table-bordered table-sm">
+      <table class="table table-bordered table-sm small">
         <thead class="bg-dark text-white">
           <tr>
             <th>ID</th>
             <th>项目名称</th>
             <th>所在地</th>
-            <th>业主</th>
+            <th>合同额(万)</th>
             <th>开工日期</th>
             <th>完工日期</th>
             <th>状态</th>
@@ -54,7 +54,7 @@
             <td>@Html.DisplayFor(m=>item.ProjectId)</td>
             <td>@Html.DisplayFor(m=>item.FullName)</td>
             <td>@Html.DisplayFor(m=>item.SitePlace)</td>
-            <td>@Html.DisplayFor(m=>item.Owner)</td>
+            <td>@Html.DisplayFor(m=>item.ContractAmount)</td>
             <td class="text-nowrap">@Html.DisplayFor(m=>item.BeginDate)</td>
             <td class="text-nowrap">@Html.DisplayFor(m=>item.EndDate)</td>
             <td class="text-nowrap">@Html.DisplayFor(m=>item.State)</td>

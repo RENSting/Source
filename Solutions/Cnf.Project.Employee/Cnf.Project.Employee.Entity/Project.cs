@@ -33,6 +33,9 @@ namespace Cnf.Project.Employee.Entity
         [DbField("ContractCode", FieldType = SqlDbType.NVarChar, Size = 200)]
         public string ContractCode { get; set; }
 
+        [DbField("ContractAmount", FieldType = SqlDbType.Float)]
+        public double ContractAmount { get; set; }
+
         [DbField("StartDate", FieldType = SqlDbType.DateTime)]
         public DateTime StartTime { get; set; }
 

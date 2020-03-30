@@ -22,12 +22,12 @@
       </li>
     </ul>
   </div>
-  <div class="card-body">
+  <div class="card-body p-2">
     <div class="my-1">图例：
         <span class="badge badge-primary">正常</span>
         <span class="badge badge-secondary">不可用</span>
     </div>
-    <table class="table table-sm table-bordered">
+    <table class="table table-sm table-bordered small">
         <thead class="bg-dark text-white">
             <tr>
                 <th>单位名称</th>
@@ -44,7 +44,7 @@
                     <td>
                     @foreach (var staff in item.Staffs[column]){
                       <a asp-action="Resume" asp-route-id="@staff.EmployeeID">
-                        <span class="badge" 
+                        <span class="badge" style="font-size: 85%;"
                             data-category="staff" 
                             data-employee-id="@staff.EmployeeID"
                             data-active-status="@staff.ActiveStatus">

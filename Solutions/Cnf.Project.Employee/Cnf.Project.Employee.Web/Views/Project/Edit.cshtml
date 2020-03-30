@@ -28,17 +28,22 @@
         </div>
     </div>
     <div class="form-group row">
-        <label asp-for="SitePlace" class="text-right col-form-label col-form-label-sm col-sm-2"></label>
-        <div class="col-sm-10">
-            <input asp-for="SitePlace" class="form-control form-control-sm" placeholder="输入工程项目所在的国家-省市-位置">
-            <span asp-validation-for="SitePlace" class="text-danger"></span>
-        </div>
-    </div>
-    <div class="form-group row">
         <label asp-for="Owner" class="text-right col-form-label col-form-label-sm col-sm-2"></label>
         <div class="col-sm-10">
             <input asp-for="Owner" class="form-control form-control-sm" placeholder="输入工程项目的业主">
             <span asp-validation-for="Owner" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="SitePlace" class="text-right col-form-label col-form-label-sm col-sm-2"></label>
+        <div class="col-sm-4">
+            <input asp-for="SitePlace" class="form-control form-control-sm" placeholder="输入工程项目所在的国家-省市-位置">
+            <span asp-validation-for="SitePlace" class="text-danger"></span>
+        </div>
+        <label asp-for="ContractAmount" class="text-right col-form-label col-form-label-sm col-sm-2"></label>
+        <div class="col-sm-4">
+            <input asp-for="ContractAmount" class="form-control form-control-sm" placeholder="单位：万元人民币">
+            <span asp-validation-for="ContractAmount" class="text-danger"></span>
         </div>
     </div>
     <div class="form-group row">

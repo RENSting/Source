@@ -85,6 +85,7 @@ namespace Cnf.Project.Employee.Web.Controllers
                     project.SitePlace = model.SitePlace;
                     project.StartTime = model.BeginDate;
                     project.Status = (int)model.State;
+                    project.ContractAmount = model.ContractAmount == null ? 0 : model.ContractAmount.Value;
 
                     await _projectService.SaveProject(project);
                     return RedirectToAction(nameof(Index));
