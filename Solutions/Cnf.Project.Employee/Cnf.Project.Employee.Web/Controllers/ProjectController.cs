@@ -198,6 +198,8 @@ namespace Cnf.Project.Employee.Web.Controllers
             var project = await _projectService.GetProjectById(id.Value);
             var originModel = new RecruitViewModel
             {
+                JustFreeOnly = true,
+                IncludeInactive = false,
                 ProjectId = project.ID,
                 ProjectName = project.FullName,
                 PageIndex = 0,
@@ -233,6 +235,7 @@ namespace Cnf.Project.Employee.Web.Controllers
                         EmployeeId = candidate.EmployeeId,
                         EmployeeName = candidate.EmployeeName,
                         SpecialityName = candidate.SpecialityName,
+                        TransferDate = DateTime.Today,
                     });
                 }
             }
@@ -244,7 +247,7 @@ namespace Cnf.Project.Employee.Web.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> RecuitConfirmed(List<TransferViewModel> model)
+        public async Task<IActionResult> RecruitConfirmed(List<TransferViewModel> model)
         {
             int errCount = 0, succCount = 0;
             int projectId = 0;
@@ -254,7 +257,7 @@ namespace Cnf.Project.Employee.Web.Controllers
                 try
                 {
                     await _projectService.Transfer(item.EmployeeId, item.ProjectId,
-                        item.DutyId, UserHelper.GetUserID(HttpContext));
+                        item.DutyId, item.TransferDate, UserHelper.GetUserID(HttpContext));
                     succCount++;
                 }
                 catch
@@ -288,7 +291,8 @@ namespace Cnf.Project.Employee.Web.Controllers
         {
             try
             {
-                await _projectService.Transfer(id, 0, 0, UserHelper.GetUserID(HttpContext));
+                // 直接通过列表排除人员直接作为当天离场处理
+                await _projectService.Transfer(id, 0, 0, DateTime.Today, UserHelper.GetUserID(HttpContext));
                 return RedirectToAction(nameof(ListEmployees), new { id = fromProjectId });
             }
             catch (Exception ex)
@@ -343,6 +347,9 @@ namespace Cnf.Project.Employee.Web.Controllers
         {
             var originModel = new RecruitViewModel
             {
+                IncludeInactive = false,
+                JustFreeOnly = false,
+                ReleaseDate = DateTime.Today,
                 PageIndex = 0,
                 PageSize = 20,
             };
@@ -360,7 +367,11 @@ namespace Cnf.Project.Employee.Web.Controllers
         {
             foreach (var staff in model.Candidates)
             {
-                await _projectService.Transfer(staff.EmployeeId, 0, 0, UserHelper.GetUserID(HttpContext));
+                if (staff.Selected)
+                {
+                    await _projectService.Transfer(staff.EmployeeId, 0, 0,
+                        model.ReleaseDate, UserHelper.GetUserID(HttpContext));
+                }
             }
             return RedirectToAction(nameof(Dispatch));
         }

@@ -79,6 +79,8 @@ namespace Cnf.Project.Employee.Api.Controllers
                 whereClause += " AND [OrganizationID]=" + criteria.SelectedOrg.Value.ToString();
             if(criteria.SelectedSpec.HasValue)
                 whereClause += " AND [SpecialtyID]=" + criteria.SelectedSpec.Value.ToString();
+            if(criteria.ActiveOnly)
+                whereClause += " AND [ActiveStatus]=1";
 
             var sql = DbHelper.BuildPagedSelectSql("*", "tb_employee", 
                 whereClause, "Name", criteria.PageIndex, criteria.PageSize);

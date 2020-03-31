@@ -8,10 +8,10 @@
     </div>
     <div class="card-body pt-2">
 <form method="POST">
-    <div class="text-muted small">以下人员将被调入所指定的项目，并承担指定的职责，您还可以修改职责。</div>
+    <div class="text-muted small">以下人将被调入项目，并承担指定职责，您还可以修改职责跟调入日期</div>
     <div class="form-inline my-3">
         <div class="form-group mr-3">
-            <button asp-action="RecuitConfirmed" class="btn btn-danger">确定</button>
+            <button asp-action="RecruitConfirmed" class="btn btn-danger">确定</button>
         </div>
         <div class="form-group">
             @if(ViewBag.From == "recruit"){
@@ -28,6 +28,7 @@
                 <th>专业</th>
                 <th>调入的项目</th>
                 <th>承担的职责</th>
+                <th>调入时间</th>
                 <th>资格情况</th>
             </tr>
         </thead>
@@ -42,7 +43,10 @@
             <td style="padding:2px;" class="py-0">@Html.DropDownListFor(m=>Model[i].DutyId, 
                 (IEnumerable<SelectListItem>)ViewBag.DutyList,
                     new{@class="form-control form-control-sm", 
-                        style="padding:0; height:23px;", onchange="changeDuty(this);"})</td>
+                        style="padding:0; height:25px;", onchange="changeDuty(this);"})</td>
+            <td style="padding: 2px;" class="py-0">
+                <input asp-for="@Model[i].TransferDate" style="height: 25px; padding:2px;" class="form-control form-control-sm">
+            </td>
             <td data-column="message" data-employee-id="@Model[i].EmployeeId" 
                 data-duty-id="@Model[i].DutyId" data-project-id="@Model[i].ProjectId">
             </td>

@@ -19,7 +19,7 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-light border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">项目人员管理</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -29,35 +29,35 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">主页</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">主页</a>
                         </li>
                         @if(UserHelper.IsManager(Context))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="Index">看板</a>
+                                <a class="nav-link" asp-area="" asp-controller="Dashboard" asp-action="Index">看板</a>
                             </li>
                         }
                         @if (UserHelper.IsSystemAdmin(Context))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="System" asp-action="Index">系统管理</a>
+                                <a class="nav-link" asp-area="" asp-controller="System" asp-action="Index">系统管理</a>
                             </li>
                         }
                         @if(UserHelper.IsHumanResourceAdmin(Context))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Employee" asp-action="Index">人员管理</a>
+                                <a class="nav-link" asp-controller="Employee" asp-action="Index">人员管理</a>
                             </li>
                         }
                         @if(UserHelper.IsProjectAdmin(Context))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Project" asp-action="Index">项目管理</a>
+                                <a class="nav-link" asp-controller="Project" asp-action="Index">项目管理</a>
                             </li>
                         }
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        @* <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li> *@
                     </ul>
                 </div>
             </div>

@@ -23,11 +23,16 @@
     </ul>
   </div>
   <div class="card-body p-2">
-    <div class="my-1">
-      图例：<span class="badge badge-success">持证满足职责要求</span>  
+    <div class="row">
+      <div class="col">
+        <span class="badge badge-success">持证满足职责要求</span>  
         <span class="badge badge-warning">持证部分满足职责要求</span> 
         <span class="badge badge-danger">不满足职责要求</span>
         <span class="badge badge-secondary">人员已不可用</span>
+      </div>
+      <div class="col text-secondary text-right small">
+        点击姓名可以查看履历
+      </div>
     </div>
     <table class="table table-sm table-bordered small">
         <thead class="bg-dark text-white">
@@ -46,7 +51,7 @@
                     <td>
                     @foreach (var staff in item.Staffs[column]){
                       <a asp-action="Resume" asp-route-id="@staff.EmployeeID">
-                        <span class="badge" style="font-size: 85%;"
+                        <span class="badge" style="font-size: 90%;"
                             data-category="staff" 
                             data-employee-id="@staff.EmployeeID"
                             data-duty-id="@staff.DutyID"

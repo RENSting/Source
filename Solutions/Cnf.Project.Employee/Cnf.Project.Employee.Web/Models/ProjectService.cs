@@ -16,7 +16,7 @@ namespace Cnf.Project.Employee.Web.Models
         Task Delete(int projectId);
         Task<DutyQualification[]> GetDutyQualifications(int dutyId);
         Task<string> VerifyTransfer(int employeeId, int projectId, int dutyId);
-        Task Transfer(int employeeId, int projectId, int dutyId, int userId);
+        Task Transfer(int employeeId, int projectId, int dutyId, DateTime transferDate, int userId);
         Task UpdateRequiredQualifcations(DutyQualifViewModel model);
         Task<PagedQuery<Entity.Project>> SearchProject(ProjectState? state, string searchName, int pageIndex, int pageSize);
     }
@@ -72,10 +72,11 @@ namespace Cnf.Project.Employee.Web.Models
                     SearchName = searchName,
                 });
 
-        public async Task Transfer(int employeeId, int projectId, int dutyId, int userId)
+        public async Task Transfer(int employeeId, int projectId, int dutyId, DateTime transferDate, int userId)
         {
             var data = new TransferInfo{
-                DutyId = dutyId, EmployeeId=employeeId, ProjectId=projectId, UserId = userId,
+                DutyId = dutyId, EmployeeId=employeeId, ProjectId=projectId, 
+                TransferDate = transferDate,UserId = userId,
             };
             await _apiConnector.HttpPost<TransferInfo, int>(ROUTE_TRANSFER, data);
         }
@@ -102,12 +103,12 @@ namespace Cnf.Project.Employee.Web.Models
             {
                 var state = result.GetData();
                 if(state == 0)
-                    return "<span class=\"badge badge-success\">OK</span>";
+                    return "<span style=\"font-size:85%;\" class=\"badge badge-success\">OK</span>";
                 else
-                    return "<span class=\"badge badge-warning\">" + result.Message + "</span>";
+                    return "<span style=\"font-size:85%;\" class=\"badge badge-warning\">" + result.Message + "</span>";
             }
             else
-                return "<span class=\"badge badge-danger\">" + result.Message + "</span>";
+                return "<span style=\"font-size:85%;\" class=\"badge badge-danger\">" + result.Message + "</span>";
         }
     }
 }

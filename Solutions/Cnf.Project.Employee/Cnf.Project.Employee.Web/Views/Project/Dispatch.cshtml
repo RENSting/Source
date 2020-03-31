@@ -42,6 +42,12 @@
                 <label asp-for="JustFreeOnly" class="form-check-label"></label>
             </div>
         </div>
+        <div class="form-group mr-2">
+            <div class="form-check form-check-inline">
+                <input asp-for="IncludeInactive" class="form-check-input">
+                <label asp-for="IncludeInactive" class="form-check-label"></label>
+            </div>
+        </div>
         <div class="form-group">
             <button asp-action="Dispatch" class="btn btn-sm btn-success">筛选和查找</button>
         </div>
@@ -51,9 +57,8 @@
         <thead class="bg-dark text-white">
             <tr>
                 <th>
-                    <div class="form-check form-check-inline">
+                    <div class="form-check form-check-inline mr-0" style="vertical-align: middle;">
                         <input type="checkbox" value="" onclick="checkAll(this);" class="form-check-input">
-                        <label class="form-check-label">全选</label>
                     </div>
                 </th>
                 <th>计划职责</th>
@@ -68,21 +73,25 @@
         <tbody>
         @for(int i = 0; i < Model.Candidates.Length; i++){
           <tr>
-              <td style="width:5rem;">
+              <td style="width:1.5rem;">
                   @Html.HiddenFor(m=>Model.Candidates[i].EmployeeId)
-                  <div class="form-check form-check-inline" style="vertical-align: middle;">
+                  <div class="form-check form-check-inline mr-0" style="vertical-align: middle;">
                       @Html.EditorFor(m=>Model.Candidates[i].Selected, 
                           new{@class="form-check-input"})
                   </div>
               </td>
-              <td style="width:10rem; padding:2px;">
+              <td style="width:10rem; padding:1px 2px;">
                   @Html.DropDownListFor(m=>Model.Candidates[i].RecruitDutyId, 
                       (IEnumerable<SelectListItem>)ViewBag.DutyList,
-                          new{@class="form-control form-control-sm", style="padding:0; height:23px;",
+                          new{@class="form-control form-control-sm", style="padding:0; height:25px;",
                           onchange="changeDuty(this);"})
               </td>
               <td>@Html.HiddenFor(m=>Model.Candidates[i].EmployeeName)
-                  @Html.DisplayFor(m=>Model.Candidates[i].EmployeeName)</td>
+                @Html.DisplayFor(m=>Model.Candidates[i].EmployeeName)
+                @if(!Model.Candidates[i].IsActive){
+                  <span class="badge badge-danger float-right">停</span>
+                }
+              </td>
               <td>@Html.HiddenFor(m=>Model.Candidates[i].SpecialityName)
                   @Html.DisplayFor(m=>Model.Candidates[i].SpecialityName)</td>
               <td>@Html.DisplayFor(m=>Model.Candidates[i].ProjectName)</td>
@@ -129,15 +138,40 @@
     </nav>
     <button class="btn btn-sm btn-primary"
         onclick="if(haveSelected()==true)loadProjects('', '', 0);return false;">加入项目</button>
-    <button asp-action="Withdraw" class="btn btn-sm btn-warning"
+    <button class="btn btn-sm btn-warning"
       onclick="
 if(haveSelected()==true){
-  if(confirm('所有选择的人员将被设为自由的，确定吗？')==false){
-    return false;
-  }
-}else{
-  return false;
-}">释放资源</button>
+  $('#setReleaseDate').modal('show');
+}
+return false;
+">释放资源</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="setReleaseDate" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="输入离场日期" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6>人员离场</h6>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="min-height: 25rem;">
+        <p class="text-secondary">所有选择的人员将被设置为自由的，请选择他们的离场日期</p>
+        <div class="form-inline">
+          <div class="form-group">
+            <label asp-for="ReleaseDate" class="mr-2"></label>
+            <input asp-for="ReleaseDate" class="form-control">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" asp-action="Withdraw" class="btn btn-sm btn-success px-4">确定</button>
+        <button type="button" class="btn btn-sm btn-secondary px-4" data-dismiss="modal">取消</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -213,7 +247,7 @@ if(haveSelected()==true){
                 return true; //confirm("即将把选中的" + selectedCount + "人加入项目，确定吗？");
             }
             else{
-                alert("没有选择任何要加入项目的人员");
+                alert("没有选择任何要处理的人员，请至少选择一个");
                 return false;
             }
         }
@@ -304,7 +338,7 @@ if(haveSelected()==true){
                     });
                     title += "";
                     var css = "badge badge-primary";
-                    var span = "<span style='font-size:85%;' data-toggle='tooltip' data-html='true' class='" + css + 
+                    var span = "<span style='font-size:90%;' data-toggle='tooltip' data-html='true' class='" + css + 
                                 "' title='" + title + 
                                 "'>" + certArray.length + "个证书" + "</span>";
                     $(td).html(span);

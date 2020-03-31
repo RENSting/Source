@@ -33,6 +33,12 @@
                 <label asp-for="JustFreeOnly" class="form-check-label"></label>
             </div>
         </div>
+        <div class="form-group mr-2">
+            <div class="form-check form-check-inline">
+                <input asp-for="IncludeInactive" class="form-check-input">
+                <label asp-for="IncludeInactive" class="form-check-label"></label>
+            </div>
+        </div>
         <div class="form-group">
             <button asp-action="Recruit" class="btn btn-sm btn-success">筛选和查找</button>
         </div>
@@ -44,9 +50,8 @@
             <thead class="bg-dark text-white">
                 <tr>
                     <th>
-                        <div class="form-check form-check-inline">
+                        <div class="form-check form-check-inline mr-0" style="vertical-align: middle;">
                             <input type="checkbox" value="" onclick="checkAll(this);" class="form-check-input">
-                            <label class="form-check-label">全选</label>
                         </div>
                     </th>
                     <th>计划职责</th>
@@ -62,21 +67,25 @@
         @for(int i = 0; i < Model.Candidates.Length; i++)
         {
             <tr>
-                <td style="width:5rem;">
+                <td style="width:1.5rem;">
                     @Html.HiddenFor(m=>Model.Candidates[i].EmployeeId)
-                    <div class="form-check form-check-inline" style="vertical-align: middle;">
+                    <div class="form-check form-check-inline mr-0" style="vertical-align: middle;">
                         @Html.EditorFor(m=>Model.Candidates[i].Selected, 
                             new{@class="form-check-input"})
                     </div>
                 </td>
-                <td style="width:10rem; padding: 2px;">
+                <td style="width:10rem; padding: 1px 2px;">
                     @Html.DropDownListFor(m=>Model.Candidates[i].RecruitDutyId, 
                         (IEnumerable<SelectListItem>)ViewBag.DutyList,
-                            new{@class="form-control form-control-sm", style="padding:0; height:23px;",
+                            new{@class="form-control form-control-sm", style="padding:0; height:25px;",
                             onchange="changeDuty(this);"})
                 </td>
                 <td>@Html.HiddenFor(m=>Model.Candidates[i].EmployeeName)
-                    @Html.DisplayFor(m=>Model.Candidates[i].EmployeeName)</td>
+                    @Html.DisplayFor(m=>Model.Candidates[i].EmployeeName)
+                    @if(!Model.Candidates[i].IsActive){
+                    <span class="badge badge-danger float-right">停</span>
+                    }
+                </td>
                 <td>@Html.HiddenFor(m=>Model.Candidates[i].SpecialityName)
                     @Html.DisplayFor(m=>Model.Candidates[i].SpecialityName)</td>
                 <td>@Html.DisplayFor(m=>Model.Candidates[i].ProjectName)</td>
@@ -176,7 +185,7 @@
                     });
                     title += "";
                     var css = "badge badge-primary";
-                    var span = "<span style='font-size:85%;' data-toggle='tooltip' data-html='true' class='" + css + 
+                    var span = "<span style='font-size:90%;' data-toggle='tooltip' data-html='true' class='" + css + 
                                 "' title='" + title + 
                                 "'>" + certArray.length + "个证书" + "</span>";
                     $(td).html(span);

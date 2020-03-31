@@ -31,16 +31,16 @@ namespace Cnf.Project.Employee.Api.Controllers
  OR [SitePlace] LIKE '%' + @name + '%'
  OR [Owner] LIKE '%' + @name + '%'
  OR [ContractCode] LIKE '%' + @name + '%')";
-            if(criteria.ProjectStatus.HasValue)
+            if (criteria.ProjectStatus.HasValue)
             {
                 whereClause += " AND [Status]=" + ((int)criteria.ProjectStatus).ToString();
             }
 
-            var sql = DbHelper.BuildPagedSelectSql("*", "tb_project", 
+            var sql = DbHelper.BuildPagedSelectSql("*", "tb_project",
                 whereClause, "[FullName]", criteria.PageIndex, criteria.PageSize);
-            
+
             SqlParameter p = new SqlParameter("@name", SqlDbType.NVarChar);
-            if(!string.IsNullOrWhiteSpace(criteria.SearchName))
+            if (!string.IsNullOrWhiteSpace(criteria.SearchName))
                 p.Value = criteria.SearchName;
             else
                 p.Value = DBNull.Value;
@@ -158,6 +158,8 @@ namespace Cnf.Project.Employee.Api.Controllers
                 int employeeId = transferInfo.EmployeeId;
                 int projectId = transferInfo.ProjectId;
                 int dutyId = transferInfo.DutyId;
+                DateTime transferDate = transferInfo.TransferDate == null ?
+                        DateTime.Today : transferInfo.TransferDate.Value;
 
                 if (employeeId <= 0 || projectId <= 0 || dutyId <= 0)
                 {
@@ -184,7 +186,7 @@ namespace Cnf.Project.Employee.Api.Controllers
                     //人员已经在项目中，列为警告
                     var inProject = await DbHelper.FindEntity<Entity.Project>(Connector, employee.InProjectID);
                     hasWarning = true;
-                    warningBuilder.Append($"人员不是自由的，他/她在项目[{inProject.ShortName}]中。");
+                    warningBuilder.Append($"已在项目[{inProject.ShortName}]中。");
                 }
 
                 var pageRequired = await DbHelper.SearchEntities<DutyQualification>(Connector,
@@ -203,14 +205,14 @@ namespace Cnf.Project.Employee.Api.Controllers
                             //人员具备一些资格证书，需要检查是否有所需的并且没有到期
                             var matched = from certification in pagedCertifications.Records
                                           where certification.QualificationID == reqired.QualificationID
-                                                && certification.ExpireDate >= DateTime.Today
+                                                && certification.ExpireDate >= transferDate
                                           select certification;
                             if (matched.Count() == 0)
                             {
                                 hasWarning = true;
                                 Qualification qualification = await DbHelper.FindEntity<Reference>(
                                     Connector, reqired.QualificationID);
-                                warningBuilder.Append($"人员不具备要求的资格[{qualification.Name}]或资格证书已过期");
+                                warningBuilder.Append($"无[{qualification.Name}]资格或已过期。");
                             }
                         }
                         else
@@ -219,7 +221,7 @@ namespace Cnf.Project.Employee.Api.Controllers
                             hasWarning = true;
                             Qualification qualification = await DbHelper.FindEntity<Reference>(
                                 Connector, reqired.QualificationID);
-                            warningBuilder.Append($"人员不具备要求的资格[{qualification.Name}]");
+                            warningBuilder.Append($"无[{qualification.Name}]资格。");
                         }
                     }
                 }
@@ -251,6 +253,8 @@ namespace Cnf.Project.Employee.Api.Controllers
                 int projectId = transferInfo.ProjectId;
                 int dutyId = transferInfo.DutyId;
                 int userId = transferInfo.UserId;
+                DateTime transferDate = transferInfo.TransferDate == null ?
+                        DateTime.Today : transferInfo.TransferDate.Value;
 
                 if (employeeId <= 0)
                 {
@@ -291,7 +295,7 @@ namespace Cnf.Project.Employee.Api.Controllers
                         ActiveStatus = true,
                         CreatedBy = userId,
                         CreatedOn = DateTime.Now,
-                        OutDate = DateTime.Today,
+                        OutDate = transferDate,
                         OutDutyID = employee.InDutyID,
                         OutEmployeeID = employeeId,
                         OutProjectID = employee.InProjectID,
@@ -322,7 +326,7 @@ namespace Cnf.Project.Employee.Api.Controllers
                         ActiveStatus = true,
                         CreatedBy = userId,
                         CreatedOn = DateTime.Now,
-                        InDate = DateTime.Today,
+                        InDate = transferDate,
                         InDutyID = dutyId,
                         InEmployeeID = employeeId,
                         InProjectID = projectId,
@@ -333,7 +337,7 @@ namespace Cnf.Project.Employee.Api.Controllers
                     await DbHelper.InsertEntity(Connector, inLog);
 
                     //修改人员状态
-                    employee.InDate = DateTime.Today;
+                    employee.InDate = transferDate;
                     employee.InDutyID = dutyId;
                     employee.InProjectID = projectId;
                     employee.ProjectName = string.IsNullOrEmpty(project.ShortName) ? project.FullName : project.ShortName;
