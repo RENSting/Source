@@ -1,0 +1,70 @@
+@model DutyViewMode
+
+@{
+    ViewData["Title"] = "岗位职责";
+}
+
+@if(Model.DutyId<=0)
+{
+    <h5>新建岗位职责</h5>
+}
+else
+{
+    <h5>编辑岗位职责：ID=@Model.DutyId.ToString()</h5>
+}
+
+<form role="form" method="POST" style="width: 480px; margin-top:20px;">
+    @Html.HiddenFor(m=>m.DutyId)
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group row">
+        <label asp-for="Category" class="col-sm-3 col-form-label"></label>
+        <div class="col-sm-9">
+            <select asp-for="Category" asp-items="@Html.GetEnumSelectList<DutyCategoryEnum>()"
+                    class="form-control"></select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="NativeCode" class="col-sm-3 col-form-label"></label>
+        <div class="col-sm-9">
+            <input asp-for="NativeCode" class="form-control" placeholder="输入不长于40位的编号">
+            <span asp-validation-for="NativeCode" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="Name" class="col-sm-3 col-form-label"></label>
+        <div class="col-sm-9">
+            <input asp-for="Name" class="form-control" placeholder="输入不超过200字符的名称">
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-9 offset-sm-3">
+            <div class="form-check ">
+                <input class="form-check-input" asp-for="IsActive">
+                <label class="form-check-label" asp-for="IsActive"></label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-4 offset-sm-3">
+             <button asp-action="EditDuty" class="btn btn-success">提交保存</button>
+        </div>
+        <div class="col-sm-5">
+            <a asp-action="References" asp-route-t="Duty"
+                class="btn btn-default">返回职责列表</a>
+        </div>
+    </div>
+    @if(Model.DutyId>0)
+    {
+        <div class="form-group row">
+            <div class="col-sm-4 offset-sm-3">
+                <button asp-action="DeleteDuty" class="btn btn-danger"
+                    onclick="if(confirm('删除职责是不可恢复的操作，确实要删除吗？')==false)return false;">删除职责</button>
+            </div>
+        </div>
+    }
+</form>
+
+@section Scripts{
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
