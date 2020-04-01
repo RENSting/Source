@@ -243,6 +243,11 @@ namespace Cnf.Project.Employee.Web.Controllers
 
         public IActionResult EditReference(ReferenceTypeEnum t)
         {
+            if(t == ReferenceTypeEnum.Duty)
+            {
+                return RedirectToAction(nameof(EditDuty));
+            }
+
             RefViewMode model = new RefViewMode
             {
                 ActiveStatus = true,
@@ -252,9 +257,24 @@ namespace Cnf.Project.Employee.Web.Controllers
             return View(model);
         }
 
+        public IActionResult EditDuty()
+        {
+            var duty = new DutyViewMode{
+                Category = DutyCategoryEnum.LeadingGroup,
+                IsActive = true,
+            };
+            return View(duty);
+        }
+
         [HttpGet("{controller}/{action}/{id}")]
         public async Task<IActionResult> EditReference(int id)
         {
+            var reference = await _sysAdminSvc.GetReference(id);
+            if(reference.Type == ReferenceTypeEnum.Duty)
+            {
+                return RedirectToAction(nameof(EditDuty), new{id=id});
+            }
+
             RefViewMode model = await _sysAdminSvc.GetReference(id);
             if (model == null || model.ID <= 0)
             {
@@ -262,6 +282,13 @@ namespace Cnf.Project.Employee.Web.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpGet("{controller}/{action}/{id}")]
+        public async Task<IActionResult> EditDuty(int id)
+        {
+            DutyViewMode duty = await _sysAdminSvc.GetReference(id);
+            return View(duty);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -300,6 +327,53 @@ namespace Cnf.Project.Employee.Web.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditDuty(DutyViewMode duty)
+        {
+            if (ModelState.IsValid)
+            {
+                Reference reference;
+                if (duty.DutyId > 0)
+                {
+                    reference = await _sysAdminSvc.GetReference(duty.DutyId);
+                    if(reference.Type != ReferenceTypeEnum.Duty)
+                    {
+                        ModelState.AddModelError("","视图模型不是岗位职责类型");
+                        return View(duty);
+                    }
+                }
+                else
+                {
+                    reference = new Reference
+                    {
+                        CreatedBy = UserHelper.GetUserID(HttpContext),
+                        CreatedOn = DateTime.Now,
+                        Type = ReferenceTypeEnum.Duty,
+                    };
+                }
+                reference.ActiveStatus = duty.IsActive;
+                if(duty.Category == DutyCategoryEnum.LeadingGroup)
+                {
+                    reference.ReferenceCode = DutyViewMode.LEADING_GROUP + duty.NativeCode?.Trim();
+                }
+                else
+                {
+                    reference.ReferenceCode = DutyViewMode.OTHERS + duty.NativeCode?.Trim();
+                }
+                reference.ReferenceValue = duty.Name;
+                try
+                {
+                    await _sysAdminSvc.SaveReference(reference);
+                    return RedirectToAction(nameof(References), new { t = reference.Type });
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "保存岗位职责失败：" + ex.Message);
+                }
+            }
+            return View(duty);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteReference(RefViewMode model)
         {
             if (ModelState.IsValid)
@@ -322,6 +396,31 @@ namespace Cnf.Project.Employee.Web.Controllers
                 }
             }
             return View(nameof(EditReference), model);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteDuty(DutyViewMode duty)
+        {
+            if (ModelState.IsValid)
+            {
+                if (duty.IsActive == true)
+                {
+                    ModelState.AddModelError("", $"不能删除正在使用中的岗位职责, 请首先停用它");
+                }
+                else
+                {
+                    try
+                    {
+                        await _sysAdminSvc.DeleteReference(duty.DutyId);
+                        return RedirectToAction(nameof(References), new { t = ReferenceTypeEnum.Duty });
+                    }
+                    catch (Exception ex)
+                    {
+                        ModelState.AddModelError("", "删除参照项失败：" + ex.Message);
+                    }
+                }
+            }
+            return View(nameof(EditDuty), duty);
         }
 
         #endregion

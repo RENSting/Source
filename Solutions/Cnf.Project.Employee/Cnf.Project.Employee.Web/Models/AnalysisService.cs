@@ -1,3 +1,5 @@
+using System.Data;
+using System.Collections.Generic;
 using Cnf.Project.Employee.Entity;
 using Cnf.CodeBase.Serialize;
 using System.Threading.Tasks;
@@ -6,7 +8,7 @@ namespace Cnf.Project.Employee.Web.Models
 {
     public interface IAnalysisService
     {
-        Task<GroupPivot> GetProjectDistribution(bool includeInactive);
+        Task<GroupPivot> GetProjectDistribution(bool activeOnly, IEnumerable<DutyCategoryEnum> categories);
 
         Task<GroupPivot> GetOrganizationDistribution(bool includeInactive);
 
@@ -25,9 +27,10 @@ namespace Cnf.Project.Employee.Web.Models
 
         public AnalysisService(IApiConnector apiConnector)=> _apiConnector = apiConnector;
 
-        public async Task<GroupPivot> GetProjectDistribution(bool includeInactive) =>
+        public async Task<GroupPivot> GetProjectDistribution(
+            bool activeOnly, IEnumerable<DutyCategoryEnum> categories) =>
             await _apiConnector.HttpGet<GroupPivot>(ROUTE_PROJ_DISTRIBUTION,
-                includeInactive? "": "activeOnly=true");
+                $"activeOnly={activeOnly}&categories={DutyViewMode.GenerateCategoriesQuery(categories)}");
 
         public async Task<GroupPivot> GetOrganizationDistribution(bool includeInactive)=>
             await _apiConnector.HttpGet<GroupPivot>(ROUTE_ORG_DISTRIBUTION,

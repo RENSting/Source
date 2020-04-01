@@ -20,25 +20,16 @@ namespace Cnf.Project.Employee.Api.Controllers
         {
             ;
         }
-
-        async Task<PagedQuery<Reference>> GetRerencesByType(ReferenceTypeEnum referenceType)
-        {
-            return await DbHelper.SearchEntities<Reference>(Connector,
-                    new Dictionary<string, object>()
-                    { [nameof(Reference.ReferenceType)] = referenceType.ToString() },
-                    0, int.MaxValue, nameof(Reference.ReferenceValue), false);
-        }
-
         //
-        // api/Reference/GetSpecialties
+        // api/Reference/GetSpecialties?activeOnly=
         //
 
         [HttpGet("GetSpecialties")]
-        public async Task<ActionResult<ApiResult<PagedQuery<Reference>>>> GetSpecialties()
+        public async Task<ActionResult<ApiResult<PagedQuery<Reference>>>> GetSpecialties(bool? activeOnly)
         {
             try
             {
-                return Success(await GetRerencesByType(ReferenceTypeEnum.Specialty));
+                return Success(await Helper.GetRerencesByType(Connector, ReferenceTypeEnum.Specialty, activeOnly));
             }
             catch (Exception ex)
             {
@@ -47,15 +38,15 @@ namespace Cnf.Project.Employee.Api.Controllers
         }
 
         //
-        // api/Reference/GetQualifications
+        // api/Reference/GetQualifications?activeOnly=
         //
 
         [HttpGet("GetQualifications")]
-        public async Task<ActionResult<ApiResult<PagedQuery<Reference>>>> GetQualifications()
+        public async Task<ActionResult<ApiResult<PagedQuery<Reference>>>> GetQualifications(bool? activeOnly)
         {
             try
             {
-                return Success(await GetRerencesByType(ReferenceTypeEnum.Qualification));
+                return Success(await Helper.GetRerencesByType(Connector, ReferenceTypeEnum.Qualification, activeOnly));
             }
             catch (Exception ex)
             {
@@ -64,15 +55,15 @@ namespace Cnf.Project.Employee.Api.Controllers
         }
 
         //
-        // api/Reference/GetDuties
+        // api/Reference/GetDuties?activeOnly=
         //
 
         [HttpGet("GetDuties")]
-        public async Task<ActionResult<ApiResult<PagedQuery<Reference>>>> GetDuties()
+        public async Task<ActionResult<ApiResult<PagedQuery<Reference>>>> GetDuties(bool? activeOnly)
         {
             try
             {
-                return Success(await GetRerencesByType(ReferenceTypeEnum.Duty));
+                return Success(await Helper.GetRerencesByType(Connector, ReferenceTypeEnum.Duty, activeOnly));
             }
             catch (Exception ex)
             {

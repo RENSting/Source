@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Data;
 using System.Collections.Generic;
 using System.Text;
@@ -15,26 +16,25 @@ namespace Cnf.Project.Employee.Api.Controllers
     [ApiController]
     public class AnalysisController : EmployeeControllerBase
     {
-        async Task<PagedQuery<Reference>> GetRerencesByType(ReferenceTypeEnum referenceType)
-        {
-            return await DbHelper.SearchEntities<Reference>(Connector,
-                    new Dictionary<string, object>()
-                    { [nameof(Reference.ReferenceType)] = referenceType.ToString() },
-                    0, int.MaxValue, nameof(Reference.ReferenceValue), false);
-        }
-
         public AnalysisController(IConfiguration configuration) : base(configuration) { }
 
         //
-        // api/Analysis/DistributionInProject?activeOnly=true/false/null
+        // api/Analysis/DistributionInProject?activeOnly=true/false/null&categories=ABC...
         //
 
         [HttpGet("DistributionInProject")]
-        public async Task<ActionResult<ApiResult<GroupPivot>>> ProjectDistribution(bool? activeOnly)
+        public async Task<ActionResult<ApiResult<GroupPivot>>> ProjectDistribution(bool? activeOnly, string categories)
         {
-            var dutyQuery = await GetRerencesByType(ReferenceTypeEnum.Duty);
+            var dutyQuery = await Helper.GetRerencesByType(Connector, ReferenceTypeEnum.Duty, activeOnly);
+            var duties = string.IsNullOrWhiteSpace(categories)?
+                        dutyQuery.Records:
+                        from d in dutyQuery.Records
+                        where (d.ReferenceCode != null && d.ReferenceCode.Length > 0)
+                            && categories.Contains(d.ReferenceCode.ToCharArray()[0], StringComparison.OrdinalIgnoreCase)
+                        select d;
+                        
             StringBuilder dutyListBuilder = new StringBuilder();
-            foreach(var duty in dutyQuery.Records)
+            foreach(var duty in duties)
             {
                 dutyListBuilder.Append($", [{duty.ReferenceValue}]");
             }
@@ -79,7 +79,7 @@ FROM base
         [HttpGet("DistributionInOrganization")]
         public async Task<ActionResult<ApiResult<GroupPivot>>> OrganizationDistribution(bool? activeOnly)
         {
-            var qualifQuery = await GetRerencesByType(ReferenceTypeEnum.Qualification);
+            var qualifQuery = await Helper.GetRerencesByType(Connector, ReferenceTypeEnum.Qualification, activeOnly);
             StringBuilder qualifListBuilder = new StringBuilder();
             foreach(var duty in qualifQuery.Records)
             {

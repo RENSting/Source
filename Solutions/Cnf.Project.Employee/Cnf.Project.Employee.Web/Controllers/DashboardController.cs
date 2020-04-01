@@ -20,21 +20,27 @@ namespace Cnf.Project.Employee.Web.Controllers
             _sysAdminService = sysAdminService;
         }
 
-        public async Task<IActionResult> Index(int? activeonly)
-        {
-            bool includeInactive;
-            if (activeonly.HasValue && activeonly.Value == 0)
-            {
-                includeInactive = true;
-            }
-            else
-            {
-                includeInactive = false;
-            }
-            ViewBag.IncludeInactive = includeInactive;
-            var pivot = await _analysisService.GetProjectDistribution(includeInactive);
+        async Task<GroupPivot> GetProjectDistribution(ProjDistViewModel model) =>
+            await _analysisService.GetProjectDistribution(
+                model.ActiveOnly, model.GetSearchCategories()
+            );
 
-            return View(pivot);
+        public async Task<IActionResult> Index()
+        {
+            var model = new ProjDistViewModel{
+                ActiveOnly = true,
+                LeadingGroupOnly = true,
+            };
+
+            model.Pivot = await GetProjectDistribution(model);
+            return View(model);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(ProjDistViewModel model)
+        {
+            model.Pivot = await GetProjectDistribution(model);
+            return View(model);
         }
 
         public async Task<IActionResult> QualifDist(int? activeonly)

@@ -211,6 +211,8 @@ namespace Cnf.Project.Employee.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Recruit(RecruitViewModel model)
         {
+            ModelState.Clear();
+
             return View(await ProcessRecruitViewModel(model));
         }
 
@@ -359,6 +361,7 @@ namespace Cnf.Project.Employee.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Dispatch(RecruitViewModel model)
         {
+            ModelState.Clear();
             return View(await ProcessRecruitViewModel(model));
         }
 

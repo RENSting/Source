@@ -59,13 +59,13 @@ namespace Cnf.Project.Employee.Web.Models
         /// <value></value>
         public string ProjectName { get; set; }
 
-        [Display(Name = "仅自由人员")]
+        [Display(Name = "仅含未加入项目")]
         public bool JustFreeOnly { get; set; }
 
-        [Display(Name = "包含冻结")]
+        [Display(Name = "包含无效人员")]
         public bool IncludeInactive { get; set; }
 
-        [Display(Name = "所属单位")]
+        [Display(Name = "所属组织")]
         public int? SelectedOrgId { get; set; }
 
         [Display(Name = "专业")]
