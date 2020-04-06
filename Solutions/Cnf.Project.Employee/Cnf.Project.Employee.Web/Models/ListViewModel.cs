@@ -1,4 +1,6 @@
-using System.Collections.Generic;
+using System;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace Cnf.Project.Employee.Web.Models
 {

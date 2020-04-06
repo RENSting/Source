@@ -29,6 +29,7 @@ namespace Cnf.Project.Employee.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<WebConnectorSettings>(Configuration.GetSection("WebConnectorSettings"));
+            services.Configure<List<ExcelMap>>(Configuration.GetSection("ExcelMappings"));
 
             services.AddScoped<IApiConnector, WebApiConnector>();
             services.AddScoped<IUserManager, UserManger>();

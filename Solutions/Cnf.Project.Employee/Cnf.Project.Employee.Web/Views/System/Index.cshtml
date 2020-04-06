@@ -1,12 +1,14 @@
 ﻿@using Cnf.Project.Employee.Entity;
+@model FileUploadViewModel;
 
 @{
     ViewData["Title"] = "系统";
 }
 
-<p class="lead">
-    本模块用于管理组织机构、用户以及参照项。<br />
-    参照项包括：<br />
+<div class="row text-muted small">
+    <p class="lead pl-4">
+        管理组织机构、用户以及参照项，包括：
+    </p>
     <ul>
         <li>
             <strong>专业</strong>：代表项目人员的主要专业方向，例如机械、电仪、土建、商务等；
@@ -18,19 +20,82 @@
             <strong>资格类型</strong>：代表项目人员要从事某项工作需要具备的资质，例如一级建造师等，资格类型与职责关联，一项职责可能需要多种资格，一个资格也可以用于多项职责。
         </li>
     </ul>
-</p>
-<div class="card" style="width:400px;">
-    <div class="card-header">
-        系统管理
+</div>
+<div class="card-deck">
+    <div class="card">
+        <div class="card-header text-center">
+            系统管理
+        </div>
+        <div class="card-body">
+            @Html.ActionLink("管理组织单位", "Organizations", "System", null, new { @class = "btn btn-secondary btn-lg btn-block" })
+            @Html.ActionLink("管理用户", "Users", "System", null, new { @class = "btn btn-secondary btn-lg btn-block" })
+            @Html.ActionLink("管理专业", "References", "System",
+                new {t=ReferenceTypeEnum.Specialty.ToString()}, new { @class = "btn btn-info btn-lg btn-block" })
+            @Html.ActionLink("管理职责", "References", "System",
+                new {t=ReferenceTypeEnum.Duty.ToString()}, new { @class = "btn btn-info btn-lg btn-block" })
+            @Html.ActionLink("管理资格类型", "References", "System",
+                new {t=ReferenceTypeEnum.Qualification.ToString()}, new { @class = "btn btn-info btn-lg btn-block" })
+        </div>
     </div>
-    <div class="card-body">
-        @Html.ActionLink("管理组织单位", "Organizations", "System", null, new { @class = "btn btn-secondary btn-lg btn-block" })
-        @Html.ActionLink("管理用户", "Users", "System", null, new { @class = "btn btn-secondary btn-lg btn-block" })
-        @Html.ActionLink("管理专业", "References", "System",
-            new {t=ReferenceTypeEnum.Specialty.ToString()}, new { @class = "btn btn-info btn-lg btn-block" })
-        @Html.ActionLink("管理职责", "References", "System",
-            new {t=ReferenceTypeEnum.Duty.ToString()}, new { @class = "btn btn-info btn-lg btn-block" })
-        @Html.ActionLink("管理资格类型", "References", "System",
-            new {t=ReferenceTypeEnum.Qualification.ToString()}, new { @class = "btn btn-info btn-lg btn-block" })
+    <div class="card">
+        <div class="card-header text-center">
+            批量导入
+        </div>
+        <div class="card-body">
+        @if(Model.ShowResult){
+            <div class="alert alert-info alert-dismissible fade show small p-2">
+                @Html.Raw(Model.ResultMessage)
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+        <p class="text-muted small">
+            请选择Excel2007-2010格式的文件(扩展名.xlsx)，且列标题必须符合格式要求
+        </p>
+        <form enctype="multipart/form-data" method="POST">
+            <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <div class="form-group mb-0">
+                        <div class="custom-file">
+                            <input asp-for="ProjectFile" type="file" class="custom-file-input"
+                                onchange="$(this).siblings('label').text(this.files[0].name)">
+                            <label asp-for="ProjectFile" style="text-align:left;" class="custom-file-label text-muted small">符合格式要求的项目文件(.xlsx)</label>
+                        </div>
+                        <span asp-validation-for="ProjectFile" class="text-danger small"></span>
+                    </div>
+                    <div class="form-group mb-0">
+                        <button asp-action="Index" asp-route-uploadType="project" class="text-nowrap btn btn-sm btn-primary">导入项目文件</button>
+                        <button asp-action="Index" asp-route-uploadType="dl_project" class="text-nowrap btn btn-sm btn-warning">下载项目导入模板</button>
+                    </div>
+                    <p class="small text-info">
+                        下载模板后，第一行是示范数据，切记要删除，要注意日期格式及状态数字的意义。
+                    </p>
+                </li>
+                <li class="list-group-item">
+                    <div class="form-group mb-0">
+                        <div class="custom-file">
+                            <input asp-for="StaffFile" type="file" class="custom-file-input"
+                                onchange="$(this).siblings('label').text(this.files[0].name)">
+                            <label asp-for="StaffFile" style="text-align:left;" class="custom-file-label text-muted small">符合格式要求的人员文件(.xlsx)</label>
+                        </div>
+                        <span asp-validation-for="StaffFile" class="text-danger small"></span>
+                    </div>
+                    <div class="form-group mb-0">
+                        <button asp-action="Index" asp-route-uploadType="staff" class="text-nowrap btn btn-sm btn-success">导入人员文件</button>
+                        <button asp-action="Index" asp-route-uploadType="dl_staff" class="text-nowrap btn btn-sm btn-warning">下载人员导入模板</button>
+                    </div>
+                    <p class="small text-info">
+                        人员模板第一行是示范数据，切记要删除，单位和专业需要输入ID，请从系统中查找。
+                    </p>
+                </li>
+            </ul>
+        </form>
+        </div>
     </div>
 </div>
+
+@section Scripts{
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

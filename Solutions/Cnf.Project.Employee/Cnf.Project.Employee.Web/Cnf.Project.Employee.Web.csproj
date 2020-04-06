@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.5"/>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0"/>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.2"/>
+    <PackageReference Include="DotNetCore.NPOI" Version="1.2.2"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Cnf.Api\Cnf.Api.csproj"/>

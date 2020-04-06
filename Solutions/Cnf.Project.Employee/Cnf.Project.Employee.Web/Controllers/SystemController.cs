@@ -1,9 +1,12 @@
 ﻿using System;
+using System.IO;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Cnf.Project.Employee.Entity;
 using Cnf.Project.Employee.Web.Models;
+using Microsoft.Extensions.Options;
 
 namespace Cnf.Project.Employee.Web.Controllers
 {
@@ -12,16 +15,170 @@ namespace Cnf.Project.Employee.Web.Controllers
     {
         readonly ISysAdminService _sysAdminSvc;
         readonly IUserManager _userManager;
+        readonly IProjectService _projectService;
+        readonly IEmployeeService _employeeService;
 
-        public SystemController(ISysAdminService sysAdminService, IUserManager userManager)
+        readonly Dictionary<string, ExcelMap> _excelMappings;
+
+        public SystemController(ISysAdminService sysAdminService,
+                IUserManager userManager, IProjectService projectService,
+                IEmployeeService employeeService, IOptionsSnapshot<List<ExcelMap>> options)
         {
             _sysAdminSvc = sysAdminService;
             _userManager = userManager;
+            _projectService = projectService;
+            _employeeService = employeeService;
+            if (options != null)
+            {
+                _excelMappings = new Dictionary<string, ExcelMap>();
+                foreach (var map in options.Value)
+                {
+                    if (!_excelMappings.ContainsKey(map.EntityName))
+                        _excelMappings.Add(map.EntityName, map);
+                }
+            }
         }
 
         public IActionResult Index()
         {
-            return View();
+            var model = new FileUploadViewModel();
+            return View(model);
+        }
+
+        bool checkStaffFile(FileUploadViewModel model)
+        {
+            if (model.StaffFile == null || !model.StaffFile.FileName.EndsWith(
+                ".xlsx", StringComparison.OrdinalIgnoreCase))
+            {
+                model.ResultMessage = "没有上传人员文件，或者文件不是Excel2007格式的(.xlsx)";
+                return false;
+            }
+            if (_excelMappings == null || !_excelMappings.ContainsKey(typeof(Entity.Employee).FullName))
+            {
+                model.ResultMessage = "尚未配置人员导入的Excel文件映射";
+                return false;
+            }
+            return true;
+        }
+
+        bool checkProjectFile(FileUploadViewModel model)
+        {
+            if (model.ProjectFile == null || !model.ProjectFile.FileName.EndsWith(
+                ".xlsx", StringComparison.OrdinalIgnoreCase))
+            {
+                model.ResultMessage = "没有上传项目文件，或者文件不是Excel2007格式的(.xlsx)";
+                return false;
+            }
+            if (_excelMappings == null || !_excelMappings.ContainsKey(typeof(Entity.Project).FullName))
+            {
+                model.ResultMessage = "尚未配置项目导入的Excel文件映射";
+                return false;
+            }
+            return true;
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(FileUploadViewModel model, string uploadType)
+        {
+            string mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+            if (uploadType.Equals("staff", StringComparison.OrdinalIgnoreCase))
+            {
+                if (checkStaffFile(model) == false)
+                {
+                    ModelState.AddModelError(nameof(FileUploadViewModel.StaffFile), model.ResultMessage);
+                }
+                else
+                {
+                    try
+                    {
+                        var result = await FileUploadHelper.Upload(
+                            model.StaffFile.OpenReadStream(),
+                            _excelMappings[typeof(Entity.Employee).FullName], 
+                            employeeService: _employeeService);
+                        model.ShowResult = true;
+                        model.ResultMessage = result;
+                    }
+                    catch (Exception ex)
+                    {
+                        ModelState.AddModelError("", ex.Message);
+                    }
+                }
+
+            }
+            else if (uploadType.Equals("project", StringComparison.OrdinalIgnoreCase))
+            {
+                if (checkProjectFile(model) == false)
+                {
+                    ModelState.AddModelError(nameof(FileUploadViewModel.ProjectFile), model.ResultMessage);
+                }
+                else
+                {
+                    try
+                    {
+                        var result = await FileUploadHelper.Upload(
+                            model.ProjectFile.OpenReadStream(),
+                            _excelMappings[typeof(Entity.Project).FullName], 
+                            projectService: _projectService);
+                        model.ShowResult = true;
+                        model.ResultMessage = result;
+                    }
+                    catch (Exception ex)
+                    {
+                        ModelState.AddModelError("", ex.Message);
+                    }
+                }
+            }
+            else if (uploadType.Equals("dl_staff", StringComparison.OrdinalIgnoreCase))
+            {
+                //下载人员模板文件
+                var mapKey = typeof(Entity.Employee).FullName;
+                if (_excelMappings != null && _excelMappings.ContainsKey(mapKey))
+                {
+                    var map = _excelMappings[mapKey];
+                    using var stream = new MemoryStream();
+                    FileUploadHelper.WriteExcelTemplate(stream, map);
+                    return File(stream.ToArray(), mime, "staff_to_import.xlsx");
+                }
+                ModelState.AddModelError("", "尚未配置人员导入的Excel文件映射");
+            }
+            else if (uploadType.Equals("dl_project", StringComparison.OrdinalIgnoreCase))
+            {
+                //下载项目模板文件
+                var mapKey = typeof(Entity.Project).FullName;
+                if (_excelMappings != null && _excelMappings.ContainsKey(mapKey))
+                {
+                    var map = _excelMappings[mapKey];
+                    using var stream = new MemoryStream();
+                    FileUploadHelper.WriteExcelTemplate(stream, map);
+                    return File(stream.ToArray(), mime, "project_to_import.xlsx");
+                }
+                ModelState.AddModelError("", "尚未配置项目导入的Excel文件映射");
+            }
+            else
+            {
+                ModelState.AddModelError("", "页面回发的姿势不对");
+            }
+            return View(model);
+        }
+
+        [HttpGet]
+        public JsonResult GetEntityMap(string name)
+        {
+            if (name.Equals("project", StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(FileUploadHelper.MapEntity(typeof(Entity.Project),
+                    new string[] { nameof(Entity.Project.FullName) }));
+            }
+            else if (name.Equals("staff", StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(FileUploadHelper.MapEntity(typeof(Entity.Employee),
+                    new string[] { nameof(Entity.Employee.IdNumber) }));
+            }
+            else
+            {
+                return Json("Wrong Name.");
+            }
         }
 
         #region organization management
@@ -243,7 +400,7 @@ namespace Cnf.Project.Employee.Web.Controllers
 
         public IActionResult EditReference(ReferenceTypeEnum t)
         {
-            if(t == ReferenceTypeEnum.Duty)
+            if (t == ReferenceTypeEnum.Duty)
             {
                 return RedirectToAction(nameof(EditDuty));
             }
@@ -259,7 +416,8 @@ namespace Cnf.Project.Employee.Web.Controllers
 
         public IActionResult EditDuty()
         {
-            var duty = new DutyViewMode{
+            var duty = new DutyViewMode
+            {
                 Category = DutyCategoryEnum.LeadingGroup,
                 IsActive = true,
             };
@@ -270,9 +428,9 @@ namespace Cnf.Project.Employee.Web.Controllers
         public async Task<IActionResult> EditReference(int id)
         {
             var reference = await _sysAdminSvc.GetReference(id);
-            if(reference.Type == ReferenceTypeEnum.Duty)
+            if (reference.Type == ReferenceTypeEnum.Duty)
             {
-                return RedirectToAction(nameof(EditDuty), new{id=id});
+                return RedirectToAction(nameof(EditDuty), new { id = id });
             }
 
             RefViewMode model = await _sysAdminSvc.GetReference(id);
@@ -335,9 +493,9 @@ namespace Cnf.Project.Employee.Web.Controllers
                 if (duty.DutyId > 0)
                 {
                     reference = await _sysAdminSvc.GetReference(duty.DutyId);
-                    if(reference.Type != ReferenceTypeEnum.Duty)
+                    if (reference.Type != ReferenceTypeEnum.Duty)
                     {
-                        ModelState.AddModelError("","视图模型不是岗位职责类型");
+                        ModelState.AddModelError("", "视图模型不是岗位职责类型");
                         return View(duty);
                     }
                 }
@@ -351,7 +509,7 @@ namespace Cnf.Project.Employee.Web.Controllers
                     };
                 }
                 reference.ActiveStatus = duty.IsActive;
-                if(duty.Category == DutyCategoryEnum.LeadingGroup)
+                if (duty.Category == DutyCategoryEnum.LeadingGroup)
                 {
                     reference.ReferenceCode = DutyViewMode.LEADING_GROUP + duty.NativeCode?.Trim();
                 }
