@@ -56,8 +56,8 @@
         <form enctype="multipart/form-data" method="POST">
             <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                    <div class="form-group mb-0">
+                <li class="list-group-item p-0">
+                    <div class="form-group mb-0 mt-2">
                         <div class="custom-file">
                             <input asp-for="ProjectFile" type="file" class="custom-file-input"
                                 onchange="$(this).siblings('label').text(this.files[0].name)">
@@ -73,8 +73,8 @@
                         下载模板后，第一行是示范数据，切记要删除，要注意日期格式及状态数字的意义。
                     </p>
                 </li>
-                <li class="list-group-item">
-                    <div class="form-group mb-0">
+                <li class="list-group-item p-0">
+                    <div class="form-group mb-0 mt-2">
                         <div class="custom-file">
                             <input asp-for="StaffFile" type="file" class="custom-file-input"
                                 onchange="$(this).siblings('label').text(this.files[0].name)">
@@ -89,6 +89,11 @@
                     <p class="small text-info">
                         人员模板第一行是示范数据，切记要删除，单位和专业需要输入ID，请从系统中查找。
                     </p>
+                </li>
+                <li class="list-group-item p-0">
+                    <div class="form-group my-2">
+                        <button asp-action="Index" asp-route-uploadType="dl_reference" class="text-nowrap btn btn-sm btn-primary">下载组织单位和专业清单</button>
+                    </div>
                 </li>
             </ul>
         </form>

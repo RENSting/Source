@@ -231,6 +231,66 @@ namespace Cnf.Project.Employee.Web.Models
             workbook.Write(stream);
         }
 
+        internal static void FullSheet<T>(T[] entities, ISheet sheet, ICellStyle dateStyle) where T:Entity.EntityBase
+        {
+            Type type = typeof(T);
+            IRow headerRow = sheet.CreateRow(0);
+            int columnIndex = 0;
+            foreach(var property in type.GetProperties())
+            {
+                headerRow.CreateCell(columnIndex).SetCellValue(property.Name);
+                int rowIndex = 1;
+                foreach(var t in entities.OrderBy(e=>e.ID).ToList())
+                {
+                    PropertyType propertyType = MapSystemType(property.PropertyType);
+                    object propertyValue = property.GetValue(t);
+                    IRow dataRow = sheet.GetRow(rowIndex);
+                    if (dataRow == null)
+                        dataRow = sheet.CreateRow(rowIndex);
+                    ICell cell = dataRow.CreateCell(columnIndex);
+                    switch (propertyType)
+                    {
+                        case PropertyType.Text:
+                            cell.SetCellValue(Convert.ToString(propertyValue));
+                            break;
+                        case PropertyType.Int:
+                            cell.SetCellValue(Convert.ToInt32(propertyValue));
+                            break;
+                        case PropertyType.Real:
+                            cell.SetCellValue(Convert.ToDouble(propertyValue));
+                            break;
+                        case PropertyType.DateTime:
+                            cell.SetCellValue(Convert.ToDateTime(propertyValue));
+                            cell.CellStyle = dateStyle;
+                            break;
+                        case PropertyType.Boolean:
+                            cell.SetCellValue(Convert.ToBoolean(propertyValue));
+                            break;
+                        default:
+                            break;
+                    }
+                    rowIndex++;
+                }
+                sheet.AutoSizeColumn(columnIndex);
+                columnIndex++;
+            }
+        }
+
+        internal static async Task WriteExcelReference(MemoryStream stream, ISysAdminService sysAdminService)
+        {
+            IWorkbook workbook = new XSSFWorkbook();
+            IDataFormat dataformat = workbook.CreateDataFormat();
+            ICellStyle dateStyle = workbook.CreateCellStyle();
+            dateStyle.DataFormat = dataformat.GetFormat("yyyy-MM-dd");
+
+            ISheet orgSheet = workbook.CreateSheet("Organizations");
+            ISheet specSheet = workbook.CreateSheet("Specialties");
+            FullSheet<Entity.Organization>(await sysAdminService.GetOrganiztions(), orgSheet, dateStyle);
+            FullSheet<Entity.Reference>(await sysAdminService.GetReferences(Entity.ReferenceTypeEnum.Specialty), specSheet, dateStyle);
+
+            workbook.Write(stream);
+        }
+
         public static async Task<string> Upload(Stream stream, ExcelMap map,
                 IEmployeeService employeeService = null,
                 IProjectService projectService = null)

@@ -155,6 +155,13 @@ namespace Cnf.Project.Employee.Web.Controllers
                 }
                 ModelState.AddModelError("", "尚未配置项目导入的Excel文件映射");
             }
+            else if(uploadType.Equals("dl_reference", StringComparison.OrdinalIgnoreCase))
+            {
+                //下载组织单位和专业清单（一个Excel文件）
+                using var stream = new MemoryStream();
+                await FileUploadHelper.WriteExcelReference(stream, _sysAdminSvc);
+                return File(stream.ToArray(), mime, "org_spec_list.xlsx");
+            }
             else
             {
                 ModelState.AddModelError("", "页面回发的姿势不对");
