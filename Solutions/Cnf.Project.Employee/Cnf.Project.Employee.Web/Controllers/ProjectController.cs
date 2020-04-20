@@ -42,7 +42,7 @@ namespace Cnf.Project.Employee.Web.Controllers
             {
                 model = new ProjectViewState
                 {
-                    ActiveStatus = true,
+                    //ActiveStatus = true,
                     BeginDate = DateTime.Today,
                     EndDate = DateTime.Today.AddYears(1),
                     State = ProjectState.Preparing
@@ -70,13 +70,13 @@ namespace Cnf.Project.Employee.Web.Controllers
                     }
                     else
                     {
-                        project = new Entity.Project
-                        {
-                            CreatedBy = UserHelper.GetUserID(HttpContext),
-                            CreatedOn = DateTime.Now,
-                        };
+                        project = new Entity.Project();
+                        //{
+                        //    CreatedBy = UserHelper.GetUserID(HttpContext),
+                        //    CreatedOn = DateTime.Now,
+                        //};
                     }
-                    project.ActiveStatus = model.ActiveStatus;
+                    //project.ActiveStatus = model.ActiveStatus;
                     project.ContractCode = model.ContractCode;
                     project.EndTime = model.EndDate;
                     project.FullName = model.FullName;

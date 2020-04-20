@@ -45,7 +45,7 @@ namespace Cnf.Project.Employee.Web.Controllers
             return View(model);
         }
 
-        bool checkStaffFile(FileUploadViewModel model)
+        bool CheckStaffFile(FileUploadViewModel model)
         {
             if (model.StaffFile == null || !model.StaffFile.FileName.EndsWith(
                 ".xlsx", StringComparison.OrdinalIgnoreCase))
@@ -61,7 +61,7 @@ namespace Cnf.Project.Employee.Web.Controllers
             return true;
         }
 
-        bool checkProjectFile(FileUploadViewModel model)
+        bool CheckProjectFile(FileUploadViewModel model)
         {
             if (model.ProjectFile == null || !model.ProjectFile.FileName.EndsWith(
                 ".xlsx", StringComparison.OrdinalIgnoreCase))
@@ -84,7 +84,7 @@ namespace Cnf.Project.Employee.Web.Controllers
 
             if (uploadType.Equals("staff", StringComparison.OrdinalIgnoreCase))
             {
-                if (checkStaffFile(model) == false)
+                if (CheckStaffFile(model) == false)
                 {
                     ModelState.AddModelError(nameof(FileUploadViewModel.StaffFile), model.ResultMessage);
                 }
@@ -108,7 +108,7 @@ namespace Cnf.Project.Employee.Web.Controllers
             }
             else if (uploadType.Equals("project", StringComparison.OrdinalIgnoreCase))
             {
-                if (checkProjectFile(model) == false)
+                if (CheckProjectFile(model) == false)
                 {
                     ModelState.AddModelError(nameof(FileUploadViewModel.ProjectFile), model.ResultMessage);
                 }
@@ -238,9 +238,11 @@ namespace Cnf.Project.Employee.Web.Controllers
                 }
                 else
                 {
-                    organization = new Organization();
-                    organization.CreatedBy = UserHelper.GetUserID(HttpContext);
-                    organization.CreatedOn = DateTime.Now;
+                    organization = new Organization
+                    {
+                        CreatedBy = UserHelper.GetUserID(HttpContext),
+                        CreatedOn = DateTime.Now
+                    };
                 }
 
                 organization.Name = model.OrgName;

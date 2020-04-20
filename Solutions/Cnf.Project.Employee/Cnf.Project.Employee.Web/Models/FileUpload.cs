@@ -87,7 +87,7 @@ namespace Cnf.Project.Employee.Web.Models
 
     public static class FileUploadHelper
     {
-        public static PropertyMap MapProperty(PropertyInfo property, int? index = default(int?)) =>
+        public static PropertyMap MapProperty(PropertyInfo property, int? index = default) =>
             new PropertyMap
             {
                 PropertyName = property.Name,
@@ -194,7 +194,9 @@ namespace Cnf.Project.Employee.Web.Models
             {
                 sheet = workbook.CreateSheet($"Sheet{i + 1}");
             }
-            IRow header = null, data = null;
+
+            IRow header = null;
+            IRow data;
             if (map.WithHeader)
             {
                 header = sheet.CreateRow(0);
@@ -337,12 +339,12 @@ namespace Cnf.Project.Employee.Web.Models
                 IRow data = sheet.GetRow(rowIndex);
                 object entity;
                 if (isProject)
-                    entity = new Entity.Project
-                    {
-                        ActiveStatus = true,
-                        CreatedOn = DateTime.Now,
-                        CreatedBy = Cnf.CodeBase.Serialize.ValueHelper.DBKEY_NULL
-                    };
+                    entity = new Entity.Project();
+                //{
+                //    ActiveStatus = true,
+                //    CreatedOn = DateTime.Now,
+                //    CreatedBy = Cnf.CodeBase.Serialize.ValueHelper.DBKEY_NULL
+                //};
                 else
                     entity = new Entity.Employee
                     {
@@ -360,28 +362,15 @@ namespace Cnf.Project.Employee.Web.Models
                     {
                         if (!Indecies.ContainsKey(propMap.ColumnIndex))
                             throw new Exception($"上传的文件无法定位到列索引[{propMap.ColumnIndex}]");
-                        object cellValue;
-
-                        switch (propMap.PropertyType)
+                        object cellValue = propMap.PropertyType switch
                         {
-                            case PropertyType.Boolean:
-                                cellValue = data.GetCell(Indecies[propMap.ColumnIndex]).BooleanCellValue;
-                                break;
-                            case PropertyType.DateTime:
-                                cellValue = data.GetCell(Indecies[propMap.ColumnIndex]).DateCellValue;
-                                break;
-                            case PropertyType.Int:
-                                cellValue = Convert.ToInt32(data.GetCell(Indecies[propMap.ColumnIndex]).NumericCellValue);
-                                break;
-                            case PropertyType.Real:
-                                cellValue = data.GetCell(Indecies[propMap.ColumnIndex]).NumericCellValue;
-                                break;
-                            case PropertyType.Text:
-                                cellValue = data.GetCell(Indecies[propMap.ColumnIndex]).StringCellValue;
-                                break;
-                            default:
-                                throw new Exception("not supported property data type");
-                        }
+                            PropertyType.Boolean => data.GetCell(Indecies[propMap.ColumnIndex]).BooleanCellValue,
+                            PropertyType.DateTime => data.GetCell(Indecies[propMap.ColumnIndex]).DateCellValue,
+                            PropertyType.Int => Convert.ToInt32(data.GetCell(Indecies[propMap.ColumnIndex]).NumericCellValue),
+                            PropertyType.Real => data.GetCell(Indecies[propMap.ColumnIndex]).NumericCellValue,
+                            PropertyType.Text => data.GetCell(Indecies[propMap.ColumnIndex]).StringCellValue,
+                            _ => throw new Exception("not supported property data type"),
+                        };
                         PropertyInfo propertyInfo = isProject ?
                             projectType.GetProperty(propMap.PropertyName,
                                 BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance) :

@@ -19,8 +19,8 @@ namespace Cnf.Project.Employee.Web.Models
     {
         public int ProjectId { get; set; }
 
-        [Display(Name = "有效性")]
-        public bool ActiveStatus { get; set; }
+        //[Display(Name = "有效性")]
+        //public bool ActiveStatus { get; set; }
 
         [Display(Name = "项目状态")]
         public ProjectState State { get; set; }
@@ -60,7 +60,7 @@ namespace Cnf.Project.Employee.Web.Models
         public static implicit operator ProjectViewState(Entity.Project project) =>
             new ProjectViewState
             {
-                ActiveStatus = project.ActiveStatus,
+                //ActiveStatus = project.ActiveStatus,
                 BeginDate = project.StartTime,
                 ContractCode = project.ContractCode,
                 ContractAmount = project.ContractAmount == 0 ? default(double?) : project.ContractAmount,

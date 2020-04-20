@@ -16,8 +16,11 @@ namespace Cnf.Project.Employee.Entity
     }
 
     [DbTable("tb_project")]
-    public class Project : EntityBase
+    public class Project// : EntityBase
     {
+        [DbField("ID", FieldType =SqlDbType.Int, IsPrimaryKey =true)]
+        public int ID { get; set; }
+
         [DbField("FullName", FieldType = SqlDbType.NVarChar)]
         public string FullName { get; set; }
 

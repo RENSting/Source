@@ -104,8 +104,8 @@ namespace Cnf.Project.Employee.Api.Controllers
 
                 if (project.ID <= 0)
                 {
-                    if (project.CreatedOn.Year <= 1900)
-                        project.CreatedOn = DateTime.Now;
+                    //if (project.CreatedOn.Year <= 1900)
+                    //    project.CreatedOn = DateTime.Now;
 
                     int newId = await DbHelper.InsertEntity(Connector, project);
                     return Success(newId);

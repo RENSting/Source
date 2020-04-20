@@ -86,7 +86,7 @@ namespace Cnf.Project.Employee.Web.Models
             var data = new DutyQualificationInfo{
                 DutyID = model.DutyId,
                 QualifIDs = string.IsNullOrWhiteSpace(model.QualifIds)?
-                    default(int[]):
+                    default:
                     model.QualifIds.Split(',', StringSplitOptions.RemoveEmptyEntries)
                         .Select(q=>Convert.ToInt32(q)).ToArray(),
             };
