@@ -31,7 +31,7 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">主页</a>
                         </li>
-                        @if(UserHelper.IsManager(Context))
+                        @if (UserHelper.IsManager(Context))
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Dashboard" asp-action="Index">看板</a>
@@ -43,28 +43,37 @@
                                 <a class="nav-link" asp-area="" asp-controller="System" asp-action="Index">系统管理</a>
                             </li>
                         }
-                        @if(UserHelper.IsHumanResourceAdmin(Context))
+                        @if (UserHelper.IsHumanResourceAdmin(Context))
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Employee" asp-action="Index">人员管理</a>
                             </li>
                         }
-                        @if(UserHelper.IsProjectAdmin(Context))
+                        @if (UserHelper.IsProjectAdmin(Context))
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Project" asp-action="Index">项目管理</a>
                             </li>
                         }
                         @* <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li> *@
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            </li> *@
                     </ul>
                 </div>
             </div>
             <div class="float-right" style="white-space:nowrap;">
-                <a asp-controller="Home" asp-action="ChangePassword" class="btn btn-sm btn-default">修改密码</a>
-                | <a asp-action="Logout" asp-controller="Home" class="btn btn-sm btn-default">注销</a>
-                | <span class="badge badge-primary">@UserHelper.GetUserName(Context)</span>
+                @if (UserHelper.GetUserID(Context) > 0)
+                {
+                    <a asp-controller="Home" asp-action="ChangePassword" class="btn btn-sm btn-default">修改密码</a>
+                    @:|
+                    <a asp-action="Logout" asp-controller="Home" class="btn btn-sm btn-default">注销</a>
+                    @:|
+                    <span class="badge badge-primary">@UserHelper.GetUserName(Context)</span>
+                }
+                else
+                {
+                    <span class="badge badge-warning">尚未登录</span>
+                }
             </div>
         </nav>
     </header>

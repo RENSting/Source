@@ -23,11 +23,17 @@ namespace Cnf.Project.Employee.Web.Controllers
             _projectService = projectService;
         }
 
-        public async Task<IActionResult> Index(ProjectState? selectedState)
+        public async Task<IActionResult> Index(ProjectState? selectedState, string searchName, int? pageIndex, int? pageSize)
         {
-            var projects = await _projectService.GetProjectByStatus(selectedState);
-            var model = ProjectListViewModel.Create(projects);
+            var searchResult = await _projectService.SearchProject(selectedState, searchName, pageIndex ??= 0, pageSize ??= 20);
+            var model = ProjectListViewModel.Create(searchResult.Records);
+            model.Total = searchResult.Total;
+            model.SearchName = searchName;
             model.SelectedState = selectedState;
+            model.PageIndex = pageIndex.Value;
+            var pmod = model.Total % pageSize.Value;
+            model.PageNumber = model.Total == 0 ? 1 : pmod == 0 ? model.Total / pageSize.Value : (model.Total / pageSize.Value + 1);
+
             return View(model);
         }
 
@@ -331,10 +337,10 @@ namespace Cnf.Project.Employee.Web.Controllers
             return RedirectToAction(nameof(Require), new { msg = msg });
         }
 
-        public async Task<JsonResult> SearchProjects(ProjectState? projectState, string searchName, int pageIndex)
+        public async Task<JsonResult> SearchProjects(ProjectState? projectState, string searchName, int pageIndex, int? pageSize)
         {
-            var pageSize = 8;
-            var result = await _projectService.SearchProject(projectState, searchName, pageIndex, pageSize);
+            pageSize ??= 8;
+            var result = await _projectService.SearchProject(projectState, searchName, pageIndex, pageSize.Value);
             return new JsonResult(new
             {
                 total = result.Total,

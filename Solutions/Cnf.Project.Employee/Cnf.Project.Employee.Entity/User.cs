@@ -10,6 +10,7 @@ namespace Cnf.Project.Employee.Entity
     [Flags]
     public enum RoleEnum
     {
+        NoPermission = 0,
         SystemAdmin = 0b0001,
         HumanResourceAdmin = 0b0010,
         ProjectAdmin = 0b0100,

@@ -1,28 +1,30 @@
-﻿
-@{
-    Layout = null;
-}
+﻿@*@{
+        Layout = null;
+    }*@
 @model LoginViewModel;
+@{
+    ViewData["Title"] = "登录";
+}
 
-<!DOCTYPE html>
+@*<!DOCTYPE html>
 
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>登录-项目人员</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
-</head>
-<body style="margin:auto; width:600px;">
+    <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>登录-项目人员</title>
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
+    </head>
+    <body style="margin:auto; width:600px;">*@
+
+<div style="padding:30px; margin:auto; width:600px;">
     @if (Model.HasChecked)
     {
         <div class="alert alert-danger">
             用户名或口令不正确，请重新输入(或者该用户已经被停用)。
         </div>
     }
-
-<div style="padding:30px;">
     <p>需要登录</p>
     <form asp-action="Login" method="post" style="background-color:lightgray;border-color:darkgrey; padding:20px;">
         <div class="form-group">
@@ -39,8 +41,8 @@
         </div>
     </form>
 </div>
-</body>
-</html>
+@*</body>
+    </html>*@
 
 @section Scripts{
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

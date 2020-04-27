@@ -59,7 +59,7 @@ namespace Cnf.Project.Employee.Web.Controllers
             }
             else
             {
-                await UserHelper.Signin(user, HttpContext);
+                UserHelper.Signin(user, HttpContext);
 
                 return RedirectToAction("Index");
             }
@@ -74,7 +74,7 @@ namespace Cnf.Project.Employee.Web.Controllers
         [HttpGet("{controller}/{action}/{id?}")]
         public async Task<IActionResult> ChangePassword(int? id)
         {
-            int currentUserId = id.HasValue? id.Value: UserHelper.GetUserID(HttpContext);
+            int currentUserId = id ?? UserHelper.GetUserID(HttpContext);
             ChangePasswordViewModel model = await _userManager.GetUser(currentUserId);
             return View(model);
         }

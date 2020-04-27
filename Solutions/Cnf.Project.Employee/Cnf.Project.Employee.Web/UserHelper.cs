@@ -16,11 +16,11 @@ namespace Cnf.Project.Employee.Web
         const string COOKIE_USERNAME = "name";
         const string COOKIE_ROLE = "role";
 
-        static int GetRole(HttpContext context) => Convert.ToInt32(context.User.FindFirstValue(COOKIE_ROLE));
+        static int GetRole(HttpContext context) => int.TryParse(context.User?.FindFirstValue(COOKIE_ROLE), out var role) ? role : 0;
 
-        public static int GetUserID(HttpContext context) => Convert.ToInt32(context.User.FindFirstValue(COOKIE_USERID));
+        public static int GetUserID(HttpContext context) => int.TryParse(context.User?.FindFirstValue(COOKIE_USERID), out var userId) ? userId : 0;
 
-        public static string GetUserName(HttpContext context) => context.User.FindFirstValue(COOKIE_USERNAME);
+        public static string GetUserName(HttpContext context) => context.User?.FindFirstValue(COOKIE_USERNAME);
         public static bool IsSystemAdmin(int role) =>
             ((RoleEnum)role & RoleEnum.SystemAdmin) == RoleEnum.SystemAdmin;
         public static bool IsSystemAdmin(HttpContext context) => IsSystemAdmin(GetRole(context));
@@ -37,7 +37,7 @@ namespace Cnf.Project.Employee.Web
             ((RoleEnum)role & RoleEnum.Manager) == RoleEnum.Manager;
         public static bool IsManager(HttpContext context) => IsManager(GetRole(context));
 
-        public static async Task Signin(User user, HttpContext context)
+        public static void Signin(User user, HttpContext context)
         {
             var claims = new List<Claim>
                 {
@@ -55,7 +55,7 @@ namespace Cnf.Project.Employee.Web
 
             var principal = new ClaimsPrincipal(identity);
 
-            await context.SignInAsync(
+            context.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 principal,properties);
 
